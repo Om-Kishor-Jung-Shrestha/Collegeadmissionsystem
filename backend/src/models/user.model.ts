@@ -1,4 +1,10 @@
-import mongoose, { Schema, Model, Document, Types } from "mongoose";
+import mongoose, {
+  Schema,
+  Model,
+  Document,
+  Types,
+} from "mongoose";
+
 import bcrypt from "bcryptjs";
 
 const emailRegexPattern =
@@ -6,6 +12,7 @@ const emailRegexPattern =
 
 /**
  * IUser - no JWT methods here.
+ *
  * All token operations live in utils/jwt.utils.ts.
  *
  * _id is Types.ObjectId.
@@ -41,7 +48,12 @@ export interface IUser extends Document {
 
   lastLogin?: Date;
 
-  comparePassword(password: string): Promise<boolean>;
+  createdAt: Date;
+  updatedAt: Date;
+
+  comparePassword(
+    password: string
+  ): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>(
@@ -71,14 +83,18 @@ const userSchema = new Schema<IUser>(
       lowercase: true,
       trim: true,
       validate: {
-        validator: (v: string) => emailRegexPattern.test(v),
+        validator: (v: string) =>
+          emailRegexPattern.test(v),
         message: "Please enter a valid email",
       },
     },
 
     password: {
       type: String,
-      minlength: [6, "Password must be at least 6 characters"],
+      minlength: [
+        6,
+        "Password must be at least 6 characters",
+      ],
       select: false,
     },
 
@@ -87,6 +103,7 @@ const userSchema = new Schema<IUser>(
         type: String,
         default: "",
       },
+
       url: {
         type: String,
         default: "",
@@ -145,7 +162,10 @@ userSchema.pre("save", async function () {
     return;
   }
 
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(
+    this.password,
+    12
+  );
 });
 
 userSchema.methods.comparePassword = async function (
@@ -155,13 +175,16 @@ userSchema.methods.comparePassword = async function (
     return false;
   }
 
-  return bcrypt.compare(enteredPassword, this.password);
+  return bcrypt.compare(
+    enteredPassword,
+    this.password
+  );
 };
-
 
 userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 
-const UserModel: Model<IUser> = mongoose.model<IUser>("User", userSchema);
+const UserModel: Model<IUser> =
+  mongoose.model<IUser>("User", userSchema);
 
 export default UserModel;
