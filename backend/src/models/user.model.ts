@@ -165,25 +165,3 @@ userSchema.index({ status: 1 });
 const UserModel: Model<IUser> = mongoose.model<IUser>("User", userSchema);
 
 export default UserModel;
-
-
-
-// userSchema.pre<IUser>("save", async function (next) {
-//   if (!this.isModified("password") || !this.password) {
-//     return next();
-//   }
-
-//   this.password = await bcrypt.hash(this.password, 12);
-
-//   next();
-// });
-
-// userSchema.methods.comparePassword = async function (
-//   enteredPassword: string
-// ): Promise<boolean> {
-//   if (!this.password) {
-//     return false;
-//   }
-
-//   return bcrypt.compare(enteredPassword, this.password);
-// };
