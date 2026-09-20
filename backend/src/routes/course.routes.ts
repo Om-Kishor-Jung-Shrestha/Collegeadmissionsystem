@@ -1,0 +1,67 @@
+import { Router } from "express";
+
+import {
+  createCourse,
+  getCourses,
+  getCourse,
+  updateCourse,
+  deleteCourse,
+} from "../controllers/course.controller";
+
+import { asyncHandler } from "../middleware/async-handler.middleware.ts";
+import { validateDto } from "../middleware/validate.middleware";
+import { validateParamsDto } from "../middleware/validate-params.middleware";
+import { authenticate } from "../middleware/authenticate.middleware";
+import { authorize } from "../middleware/authorize.middleware";
+
+import {
+  CreateCourseDto,
+  UpdateCourseDto,
+  CourseIdParamDto,
+} from "../dtos/course.dtos";
+
+const router = Router();
+
+/*
+ * Public/read operations
+ */
+router.get(
+  "/",
+  asyncHandler(getCourses)
+);
+
+router.get(
+  "/:id",
+  validateParamsDto(CourseIdParamDto),
+  asyncHandler(getCourse)
+);
+
+/*
+ * Admin/Superadmin operations
+ */
+router.post(
+  "/",
+  authenticate,
+  authorize("admin", "superadmin"),
+  validateDto(CreateCourseDto),
+  asyncHandler(createCourse)
+);
+
+router.patch(
+  "/:id",
+  authenticate,
+  authorize("admin", "superadmin"),
+  validateParamsDto(CourseIdParamDto),
+  validateDto(UpdateCourseDto),
+  asyncHandler(updateCourse)
+);
+
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("admin", "superadmin"),
+  validateParamsDto(CourseIdParamDto),
+  asyncHandler(deleteCourse)
+);
+
+export default router;
