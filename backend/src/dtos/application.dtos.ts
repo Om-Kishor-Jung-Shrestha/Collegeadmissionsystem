@@ -1,6 +1,10 @@
 import {
+  // ArrayMaxSize,
+  // ArrayMinSize,
+  // IsArray,
   IsEmail,
   IsEnum,
+  IsIn,
   IsInt,
   IsMongoId,
   IsNotEmpty,
@@ -11,11 +15,15 @@ import {
   MaxLength,
   Min,
   MinLength,
+  ValidateNested,
 } from "class-validator";
+import { Type } from "class-transformer";
 
 import {
+  APPLICATION_INTAKES,
   APPLICATION_STATUSES,
   HIGHER_EDUCATION_BOARDS,
+  ApplicationIntake,
   ApplicationStatus,
   HigherEducationBoard,
 } from "../models/application.model";
@@ -50,8 +58,6 @@ export class AcademicHistoryDto {
   gradeOrGpa!: string;
 }
 
-// ---------- Create Application ----------
-
 export class CreateApplicationDto {
   @IsString()
   @IsNotEmpty({
@@ -84,12 +90,9 @@ export class CreateApplicationDto {
   })
   lastName!: string;
 
-  @IsEmail(
-    {},
-    {
-      message: "Invalid email address",
-    }
-  )
+  @IsEmail({}, {
+    message: "Invalid email address",
+  })
   email!: string;
 
   @IsString()
@@ -108,6 +111,21 @@ export class CreateApplicationDto {
 
   @IsString()
   @IsNotEmpty({
+    message: "Admission session is required",
+  })
+  @Matches(/^\d{4}\/\d{4}$/, {
+    message:
+      "Admission session must be in YYYY/YYYY format",
+  })
+  admissionSession!: string;
+
+  @IsEnum(APPLICATION_INTAKES, {
+    message: "Invalid admission intake",
+  })
+  admissionIntake!: ApplicationIntake;
+
+  @IsString()
+  @IsNotEmpty({
     message: "Academic qualification is required",
   })
   @MinLength(2, {
@@ -120,6 +138,8 @@ export class CreateApplicationDto {
   })
   academicQualification!: string;
 
+  @ValidateNested()
+  @Type(() => AcademicHistoryDto)
   academicHistory!: AcademicHistoryDto;
 
   @IsString()
@@ -134,14 +154,12 @@ export class CreateApplicationDto {
   })
   address!: string;
 
+  @IsOptional()
   @IsEnum(APPLICATION_STATUSES, {
     message: "Invalid application status",
   })
-  @IsOptional()
   status?: ApplicationStatus;
 }
-
-// ---------- Full Application Update ----------
 
 export class UpdateApplicationDto {
   @IsOptional()
@@ -162,12 +180,9 @@ export class UpdateApplicationDto {
   lastName?: string;
 
   @IsOptional()
-  @IsEmail(
-    {},
-    {
-      message: "Invalid email address",
-    }
-  )
+  @IsEmail({}, {
+    message: "Invalid email address",
+  })
   email?: string;
 
   @IsOptional()
@@ -185,11 +200,27 @@ export class UpdateApplicationDto {
 
   @IsOptional()
   @IsString()
+  @Matches(/^\d{4}\/\d{4}$/, {
+    message:
+      "Admission session must be in YYYY/YYYY format",
+  })
+  admissionSession?: string;
+
+  @IsOptional()
+  @IsEnum(APPLICATION_INTAKES, {
+    message: "Invalid admission intake",
+  })
+  admissionIntake?: ApplicationIntake;
+
+  @IsOptional()
+  @IsString()
   @MinLength(2)
   @MaxLength(200)
   academicQualification?: string;
 
   @IsOptional()
+  @ValidateNested()
+  @Type(() => AcademicHistoryDto)
   academicHistory?: AcademicHistoryDto;
 
   @IsOptional()
@@ -205,8 +236,6 @@ export class UpdateApplicationDto {
   status?: ApplicationStatus;
 }
 
-// ---------- Status-only Update ----------
-
 export class UpdateStatusDto {
   @IsEnum(APPLICATION_STATUSES, {
     message: "Invalid application status",
@@ -214,7 +243,50 @@ export class UpdateStatusDto {
   status!: ApplicationStatus;
 }
 
-// ---------- List Applications Query ----------
+// export class ListApplicationsQueryDto {
+//   @IsOptional()
+//   @IsString()
+//   search?: string;
+
+//   @IsOptional()
+//   @IsMongoId({
+//     message: "Invalid program ID",
+//   })
+//   program?: string;
+
+//   @IsOptional()
+//   @IsEnum(APPLICATION_STATUSES, {
+//     message: "Invalid application status",
+//   })
+//   status?: ApplicationStatus;
+
+//   @IsOptional()
+//   @IsString()
+//   @Matches(/^\d{4}\/\d{4}$/, {
+//     message:
+//       "Admission session must be in YYYY/YYYY format",
+//   })
+//   admissionSession?: string;
+
+//   @IsOptional()
+//   @IsEnum(APPLICATION_INTAKES, {
+//     message: "Invalid admission intake",
+//   })
+//   admissionIntake?: ApplicationIntake;
+
+//   @IsOptional()
+//   @Type(() => Number)
+//   @IsInt()
+//   @Min(1)
+//   page: number = 1;
+
+//   @IsOptional()
+//   @Type(() => Number)
+//   @IsInt()
+//   @Min(1)
+//   @Max(100)
+//   limit: number = 10;
+// }
 
 export class ListApplicationsQueryDto {
   @IsOptional()
@@ -222,30 +294,42 @@ export class ListApplicationsQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsMongoId({
-    message: "Invalid program ID",
-  })
+  @IsMongoId()
   program?: string;
 
   @IsOptional()
-  @IsEnum(APPLICATION_STATUSES, {
-    message: "Invalid application status",
-  })
+  @IsIn(APPLICATION_STATUSES)
   status?: ApplicationStatus;
 
   @IsOptional()
+  @IsString()
+  admissionSession?: string;
+
+  @IsOptional()
+  @IsIn(APPLICATION_INTAKES)
+  admissionIntake?: ApplicationIntake;
+
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page: number = 1;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
   limit: number = 10;
-}
 
-// ---------- Application ID ----------
+  @IsOptional()
+  @IsString()
+  sortBy: string = "createdAt";
+
+  @IsOptional()
+  @IsIn(["asc", "desc"])
+  sortOrder: "asc" | "desc" = "desc";
+}
 
 export class ApplicationIdParamDto {
   @IsMongoId({
@@ -254,7 +338,14 @@ export class ApplicationIdParamDto {
   id!: string;
 }
 
-// ---------- Response DTOs ----------
+export interface ApplicationFileDto {
+  storage: "cloudinary" | "local";
+  public_id: string;
+  url: string;
+  path?: string;
+  resourceType: "image" | "raw";
+  format: string;
+}
 
 export interface ApplicationResponseDto {
   id: string;
@@ -267,6 +358,9 @@ export interface ApplicationResponseDto {
   phone: string;
 
   program: string;
+
+  admissionSession: string;
+  admissionIntake: ApplicationIntake;
 
   academicQualification: string;
 
@@ -281,51 +375,28 @@ export interface ApplicationResponseDto {
   status: ApplicationStatus;
 
   documents: {
-    citizenship: {
-      public_id: string;
-      url: string;
-      resourceType: "image" | "raw";
-      format: string;
-    };
-
-    cover: {
-      public_id: string;
-      url: string;
-      resourceType: "image" | "raw";
-      format: string;
-    };
-
-    characterCertificate: {
-      public_id: string;
-      url: string;
-      resourceType: "image" | "raw";
-      format: string;
-    };
-
-    document: {
-      public_id: string;
-      url: string;
-      resourceType: "image" | "raw";
-      format: string;
-    };
-
-    marksheet12: {
-      public_id: string;
-      url: string;
-      resourceType: "image" | "raw";
-      format: string;
-    };
+    citizenship: ApplicationFileDto;
+    cover: ApplicationFileDto;
+    characterCertificate: ApplicationFileDto;
+    document: ApplicationFileDto;
+    marksheet12: ApplicationFileDto;
   };
 
-  applicantImage: {
-    public_id: string;
-    url: string;
-    resourceType: "image";
-    format: string;
-  };
+  applicantImage: ApplicationFileDto;
 
   createdBy?: string;
 
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PaginatedApplicationsResponseDto {
+  data: ApplicationResponseDto[];
+
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }

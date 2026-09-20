@@ -1,57 +1,56 @@
 import mongoose, {
+  Document,
   Model,
   Schema,
   Types,
 } from "mongoose";
 
-/*
-|--------------------------------------------------------------------------
-| Application Status
-|--------------------------------------------------------------------------
-*/
-
 export const APPLICATION_STATUSES = [
-  "Pending",
-  "Under Review",
-  "Approved",
-  "Rejected",
+  "pending",
+  "under_review",
+  "approved",
+  "rejected",
 ] as const;
 
 export type ApplicationStatus =
   (typeof APPLICATION_STATUSES)[number];
 
-/*
-|--------------------------------------------------------------------------
-| Board of Higher Education
-|--------------------------------------------------------------------------
-*/
+export const APPLICATION_INTAKES = [
+  "Spring",
+  "Fall",
+] as const;
+
+export type ApplicationIntake =
+  (typeof APPLICATION_INTAKES)[number];
 
 export const HIGHER_EDUCATION_BOARDS = [
-  "NEB +2",
-  "CBSE 12",
-  "GCE A Level",
+  "NEB",
+  "CTEVT",
+  "TU",
+  "KU",
+  "PU",
+  "Other",
 ] as const;
 
 export type HigherEducationBoard =
   (typeof HIGHER_EDUCATION_BOARDS)[number];
 
-/*
-|--------------------------------------------------------------------------
-| Validation Regex
-|--------------------------------------------------------------------------
-*/
+export type ApplicationFileStorage =
+  | "cloudinary"
+  | "local";
 
-export const EMAIL_REGEX =
-  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+export type ApplicationFileResourceType =
+  | "image"
+  | "raw";
 
-export const PHONE_REGEX =
-  /^\+?[0-9\s\-()]{7,20}$/;
-
-/*
-|--------------------------------------------------------------------------
-| Academic History
-|--------------------------------------------------------------------------
-*/
+export interface IApplicationFile {
+  storage: ApplicationFileStorage;
+  public_id: string;
+  url: string;
+  path?: string;
+  resourceType: ApplicationFileResourceType;
+  format: string;
+}
 
 export interface IAcademicHistory {
   collegeOrSchool: string;
@@ -59,145 +58,84 @@ export interface IAcademicHistory {
   gradeOrGpa: string;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Application Document
-|--------------------------------------------------------------------------
-*/
-
-export interface IApplicationDocument {
-  public_id: string;
-  url: string;
-  resourceType: "image" | "raw";
-  format: string;
-}
-
-/*
-|--------------------------------------------------------------------------
-| Application Documents
-|--------------------------------------------------------------------------
-*/
-
-export interface IApplicationDocuments {
-  citizenship: IApplicationDocument;
-  cover: IApplicationDocument;
-  characterCertificate: IApplicationDocument;
-  document: IApplicationDocument;
-  marksheet12: IApplicationDocument;
-}
-
-/*
-|--------------------------------------------------------------------------
-| Applicant Image
-|--------------------------------------------------------------------------
-*/
-
-export interface IApplicantImage {
-  public_id: string;
-  url: string;
-  resourceType: "image";
-  format: string;
-}
-
-/*
-|--------------------------------------------------------------------------
-| Application Interface
-|--------------------------------------------------------------------------
-*/
-
-export interface IApplication {
+export interface IApplication extends Document {
   _id: Types.ObjectId;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Applicant Information
-  |--------------------------------------------------------------------------
-  */
-
   firstName: string;
-
   middleName?: string;
-
   lastName: string;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Contact Information
-  |--------------------------------------------------------------------------
-  */
-
   email: string;
-
   phone: string;
-
-  /*
-  |--------------------------------------------------------------------------
-  | Program
-  |--------------------------------------------------------------------------
-  */
 
   program: Types.ObjectId;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Academic Information
-  |--------------------------------------------------------------------------
-  */
+  admissionSession: string;
+  admissionIntake: ApplicationIntake;
 
   academicQualification: string;
 
   academicHistory: IAcademicHistory;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Address
-  |--------------------------------------------------------------------------
-  */
-
   address: string;
-
-  /*
-  |--------------------------------------------------------------------------
-  | Documents
-  |--------------------------------------------------------------------------
-  */
-
-  documents: IApplicationDocuments;
-
-  /*
-  |--------------------------------------------------------------------------
-  | Applicant Image
-  |--------------------------------------------------------------------------
-  */
-
-  applicantImage: IApplicantImage;
-
-  /*
-  |--------------------------------------------------------------------------
-  | Application Status
-  |--------------------------------------------------------------------------
-  */
 
   status: ApplicationStatus;
 
-  /*
-  |--------------------------------------------------------------------------
-  | Created By
-  |--------------------------------------------------------------------------
-  */
+  documents: {
+    citizenship: IApplicationFile;
+    cover: IApplicationFile;
+    characterCertificate: IApplicationFile;
+    document: IApplicationFile;
+    marksheet12: IApplicationFile;
+  };
+
+  applicantImage: IApplicationFile;
 
   createdBy?: Types.ObjectId;
 
   createdAt: Date;
-
   updatedAt: Date;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Academic History Schema
-|--------------------------------------------------------------------------
-*/
+const applicationFileSchema =
+  new Schema<IApplicationFile>(
+    {
+      storage: {
+        type: String,
+        enum: ["cloudinary", "local"],
+        required: true,
+      },
+
+      public_id: {
+        type: String,
+        default: "",
+      },
+
+      url: {
+        type: String,
+        required: true,
+      },
+
+      path: {
+        type: String,
+        default: "",
+      },
+
+      resourceType: {
+        type: String,
+        enum: ["image", "raw"],
+        required: true,
+      },
+
+      format: {
+        type: String,
+        required: true,
+      },
+    },
+    {
+      _id: false,
+    }
+  );
 
 const academicHistorySchema =
   new Schema<IAcademicHistory>(
@@ -209,25 +147,14 @@ const academicHistorySchema =
           "College or school name is required",
         ],
         trim: true,
-        minlength: [
-          2,
-          "College or school name must be at least 2 characters",
-        ],
-        maxlength: [
-          200,
-          "College or school name cannot exceed 200 characters",
-        ],
       },
 
       board: {
         type: String,
-        enum: {
-          values: HIGHER_EDUCATION_BOARDS,
-          message: "Invalid higher education board",
-        },
+        enum: HIGHER_EDUCATION_BOARDS,
         required: [
           true,
-          "Board of higher education is required",
+          "Higher education board is required",
         ],
       },
 
@@ -238,177 +165,16 @@ const academicHistorySchema =
           "Grade or GPA is required",
         ],
         trim: true,
-        maxlength: [
-          20,
-          "Grade or GPA cannot exceed 20 characters",
-        ],
       },
     },
     {
       _id: false,
     }
   );
-
-/*
-|--------------------------------------------------------------------------
-| Application Document Schema
-|--------------------------------------------------------------------------
-*/
-
-const applicationDocumentSchema =
-  new Schema<IApplicationDocument>(
-    {
-      public_id: {
-        type: String,
-        required: [
-          true,
-          "Document public ID is required",
-        ],
-      },
-
-      url: {
-        type: String,
-        required: [
-          true,
-          "Document URL is required",
-        ],
-      },
-
-      resourceType: {
-        type: String,
-        enum: ["image", "raw"],
-        required: true,
-      },
-
-      format: {
-        type: String,
-        required: [
-          true,
-          "Document format is required",
-        ],
-        lowercase: true,
-      },
-    },
-    {
-      _id: false,
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| Application Documents Schema
-|--------------------------------------------------------------------------
-*/
-
-const applicationDocumentsSchema =
-  new Schema<IApplicationDocuments>(
-    {
-      citizenship: {
-        type: applicationDocumentSchema,
-        required: [
-          true,
-          "Citizenship document is required",
-        ],
-      },
-
-      cover: {
-        type: applicationDocumentSchema,
-        required: [
-          true,
-          "Cover document is required",
-        ],
-      },
-
-      characterCertificate: {
-        type: applicationDocumentSchema,
-        required: [
-          true,
-          "Character certificate is required",
-        ],
-      },
-
-      document: {
-        type: applicationDocumentSchema,
-        required: [
-          true,
-          "Document is required",
-        ],
-      },
-
-      marksheet12: {
-        type: applicationDocumentSchema,
-        required: [
-          true,
-          "12th marksheet is required",
-        ],
-      },
-    },
-    {
-      _id: false,
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| Applicant Image Schema
-|--------------------------------------------------------------------------
-*/
-
-const applicantImageSchema =
-  new Schema<IApplicantImage>(
-    {
-      public_id: {
-        type: String,
-        required: [
-          true,
-          "Applicant image public ID is required",
-        ],
-      },
-
-      url: {
-        type: String,
-        required: [
-          true,
-          "Applicant image URL is required",
-        ],
-      },
-
-      resourceType: {
-        type: String,
-        enum: ["image"],
-        required: true,
-        default: "image",
-      },
-
-      format: {
-        type: String,
-        required: [
-          true,
-          "Applicant image format is required",
-        ],
-        lowercase: true,
-      },
-    },
-    {
-      _id: false,
-    }
-  );
-
-/*
-|--------------------------------------------------------------------------
-| Application Schema
-|--------------------------------------------------------------------------
-*/
 
 const applicationSchema =
   new Schema<IApplication>(
     {
-      /*
-      |--------------------------------------------------------------------------
-      | Applicant Information
-      |--------------------------------------------------------------------------
-      */
-
       firstName: {
         type: String,
         required: [
@@ -416,24 +182,12 @@ const applicationSchema =
           "First name is required",
         ],
         trim: true,
-        minlength: [
-          2,
-          "First name must be at least 2 characters",
-        ],
-        maxlength: [
-          50,
-          "First name cannot exceed 50 characters",
-        ],
       },
 
       middleName: {
         type: String,
         trim: true,
         default: "",
-        maxlength: [
-          50,
-          "Middle name cannot exceed 50 characters",
-        ],
       },
 
       lastName: {
@@ -443,21 +197,7 @@ const applicationSchema =
           "Last name is required",
         ],
         trim: true,
-        minlength: [
-          2,
-          "Last name must be at least 2 characters",
-        ],
-        maxlength: [
-          50,
-          "Last name cannot exceed 50 characters",
-        ],
       },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Contact Information
-      |--------------------------------------------------------------------------
-      */
 
       email: {
         type: String,
@@ -465,12 +205,8 @@ const applicationSchema =
           true,
           "Email is required",
         ],
-        trim: true,
         lowercase: true,
-        match: [
-          EMAIL_REGEX,
-          "Invalid email address",
-        ],
+        trim: true,
       },
 
       phone: {
@@ -480,17 +216,7 @@ const applicationSchema =
           "Phone number is required",
         ],
         trim: true,
-        match: [
-          PHONE_REGEX,
-          "Invalid phone number",
-        ],
       },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Program
-      |--------------------------------------------------------------------------
-      */
 
       program: {
         type: Schema.Types.ObjectId,
@@ -501,11 +227,23 @@ const applicationSchema =
         ],
       },
 
-      /*
-      |--------------------------------------------------------------------------
-      | Academic Qualification
-      |--------------------------------------------------------------------------
-      */
+      admissionSession: {
+        type: String,
+        required: [
+          true,
+          "Admission session is required",
+        ],
+        trim: true,
+      },
+
+      admissionIntake: {
+        type: String,
+        enum: APPLICATION_INTAKES,
+        required: [
+          true,
+          "Admission intake is required",
+        ],
+      },
 
       academicQualification: {
         type: String,
@@ -514,35 +252,12 @@ const applicationSchema =
           "Academic qualification is required",
         ],
         trim: true,
-        minlength: [
-          2,
-          "Academic qualification must be at least 2 characters",
-        ],
-        maxlength: [
-          200,
-          "Academic qualification cannot exceed 200 characters",
-        ],
       },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Academic History
-      |--------------------------------------------------------------------------
-      */
 
       academicHistory: {
         type: academicHistorySchema,
-        required: [
-          true,
-          "Academic history is required",
-        ],
+        required: true,
       },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Address
-      |--------------------------------------------------------------------------
-      */
 
       address: {
         type: String,
@@ -551,65 +266,45 @@ const applicationSchema =
           "Address is required",
         ],
         trim: true,
-        minlength: [
-          5,
-          "Address must be at least 5 characters",
-        ],
-        maxlength: [
-          300,
-          "Address cannot exceed 300 characters",
-        ],
       },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Documents
-      |--------------------------------------------------------------------------
-      */
-
-      documents: {
-        type: applicationDocumentsSchema,
-        required: [
-          true,
-          "Application documents are required",
-        ],
-      },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Applicant Image
-      |--------------------------------------------------------------------------
-      */
-
-      applicantImage: {
-        type: applicantImageSchema,
-        required: [
-          true,
-          "Applicant image is required",
-        ],
-      },
-
-      /*
-      |--------------------------------------------------------------------------
-      | Application Status
-      |--------------------------------------------------------------------------
-      */
 
       status: {
         type: String,
-        enum: {
-          values: APPLICATION_STATUSES,
-          message: "Invalid application status",
-        },
-        required: true,
-        default: "Pending",
+        enum: APPLICATION_STATUSES,
+        default: "pending",
       },
 
-      /*
-      |--------------------------------------------------------------------------
-      | Created By
-      |--------------------------------------------------------------------------
-      */
+      documents: {
+        citizenship: {
+          type: applicationFileSchema,
+          required: true,
+        },
+
+        cover: {
+          type: applicationFileSchema,
+          required: true,
+        },
+
+        characterCertificate: {
+          type: applicationFileSchema,
+          required: true,
+        },
+
+        document: {
+          type: applicationFileSchema,
+          required: true,
+        },
+
+        marksheet12: {
+          type: applicationFileSchema,
+          required: true,
+        },
+      },
+
+      applicantImage: {
+        type: applicationFileSchema,
+        required: true,
+      },
 
       createdBy: {
         type: Schema.Types.ObjectId,
@@ -622,16 +317,20 @@ const applicationSchema =
     }
   );
 
-/*
-|--------------------------------------------------------------------------
-| Indexes
-|--------------------------------------------------------------------------
-*/
+applicationSchema.index({
+  program: 1,
+});
 
 applicationSchema.index({
   status: 1,
-  program: 1,
-  createdAt: -1,
+});
+
+applicationSchema.index({
+  admissionSession: 1,
+});
+
+applicationSchema.index({
+  admissionIntake: 1,
 });
 
 applicationSchema.index({
@@ -639,9 +338,17 @@ applicationSchema.index({
 });
 
 applicationSchema.index({
-  firstName: 1,
-  middleName: 1,
-  lastName: 1,
+  phone: 1,
+});
+
+applicationSchema.index({
+  createdAt: -1,
+});
+
+applicationSchema.index({
+  program: 1,
+  admissionSession: 1,
+  admissionIntake: 1,
 });
 
 const ApplicationModel: Model<IApplication> =
