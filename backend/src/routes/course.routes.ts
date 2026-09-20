@@ -13,7 +13,8 @@ import { validateDto } from "../middleware/validate.middleware";
 import { validateParamsDto } from "../middleware/validate-params.middleware";
 import { authenticate } from "../middleware/authenticate.middleware";
 import { authorize } from "../middleware/authorize.middleware";
-
+import { validateQueryDto } from "../middleware/validate-query.middleware";
+import { CourseQueryDto } from "../dtos/course-query.dtos";
 import {
   CreateCourseDto,
   UpdateCourseDto,
@@ -21,12 +22,9 @@ import {
 } from "../dtos/course.dtos";
 
 const router = Router();
-
-/*
- * Public/read operations
- */
 router.get(
   "/",
+  validateQueryDto(CourseQueryDto),
   asyncHandler(getCourses)
 );
 
@@ -36,9 +34,6 @@ router.get(
   asyncHandler(getCourse)
 );
 
-/*
- * Admin/Superadmin operations
- */
 router.post(
   "/",
   authenticate,

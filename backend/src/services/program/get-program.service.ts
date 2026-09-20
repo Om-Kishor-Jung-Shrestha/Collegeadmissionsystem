@@ -1,87 +1,19 @@
 import ProgramModel from "../../models/program.model";
-// import { toProgramResponseDto } from "../../mappers/program.mapper";
-import type { ProgramQueryDto } from "../../dtos/program-query.dtos";
-import type {
-  PaginatedResponseDto,
-  PaginationMeta,
-} from "../../dtos/pagination-response.dtos";
+import { AppError } from "../../errors/app.error";
 import { toProgramResponseDto } from "../../mapper/program.mapper";
 
-export async function getProgramsService(
-  query: ProgramQueryDto
-): Promise<
-  PaginatedResponseDto<
-    ReturnType<typeof toProgramResponseDto>
-  >
-> {
-  const {
-    page = 1,
-    limit = 10,
-    search,
-    mnemonic,
-    sortBy = "name",
-    sortOrder = "asc",
-  } = query;
+export async function getProgramService(
+  id: string
+): Promise<ReturnType<typeof toProgramResponseDto>> {
+  const program = await ProgramModel.findById(id);
 
-  const filter: Record<string, unknown> = {};
-
-  if (search?.trim()) {
-    const searchRegex = new RegExp(
-      search.trim(),
-      "i"
+  if (!program) {
+    throw new AppError(
+      "Program not found",
+      404,
+      "PROGRAM_NOT_FOUND"
     );
-
-    filter.$or = [
-      { name: searchRegex },
-      { mnemonic: searchRegex },
-    ];
   }
 
-  if (mnemonic?.trim()) {
-    filter.mnemonic = mnemonic
-      .trim()
-      .toUpperCase();
-  }
-
-  const skip = (page - 1) * limit;
-
-  const allowedSortFields = [
-    "name",
-    "mnemonic",
-    "createdAt",
-    "updatedAt",
-  ];
-
-  const safeSortBy = allowedSortFields.includes(sortBy)
-    ? sortBy
-    : "name";
-
-  const sort: Record<string, 1 | -1> = {
-    [safeSortBy]: sortOrder === "desc" ? -1 : 1,
-  };
-
-  const [programs, totalItems] = await Promise.all([
-    ProgramModel.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit),
-
-    ProgramModel.countDocuments(filter),
-  ]);
-
-  const totalPages = Math.ceil(totalItems / limit);
-
-  const pagination: PaginationMeta = {
-    page,
-    limit,
-    totalItems,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPreviousPage: page > 1,
-  };
-
-  return {
-    items: programs.map(toProgramResponseDto),
-    pagination,
-  };
+  return toProgramResponseDto(program);
 }

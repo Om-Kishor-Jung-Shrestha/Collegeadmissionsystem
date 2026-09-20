@@ -19,6 +19,7 @@ import {
 } from "./middleware/request-logger.middleware";
 import courseRoutes from "./routes/course.routes";
 import programRoutes from "./routes/program.routes";
+import userRoutes from "./routes/user.routes";
 const app = express();
 
 app.disable("x-powered-by");
@@ -94,6 +95,7 @@ app.use(
 );
 app.use("/api/v1/programs", programRoutes);
 app.use("/api/v1/courses", courseRoutes);
+app.use("/api/v1/users", userRoutes);
 // ---------- Central Error Handler ----------
 
 app.use(errorMiddleware);
