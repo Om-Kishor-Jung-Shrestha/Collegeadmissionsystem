@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import UserModel from '../models/user.model';
-// import CourseModel from '../models/course.model';
+
 
 // ── JWT Cookie Helper ─────────────────────────────────────────────────────────
 function extractToken(req: Request): string | null {
@@ -108,19 +108,19 @@ export function isSuperAdmin(
   next();
 }
 
-// ── hasPurchased ──────────────────────────────────────────────────────────────
-export async function hasPurchased(req: Request, res: Response, next: NextFunction): Promise<void> {
-  if (!req.user) { res.status(401).json({ success: false, message: 'Not authenticated' }); return; }
-  if (req.user.role === 'admin' || req.user.role === 'superadmin') { next(); return; }
+// // ── hasPurchased ──────────────────────────────────────────────────────────────
+// export async function hasPurchased(req: Request, res: Response, next: NextFunction): Promise<void> {
+//   if (!req.user) { res.status(401).json({ success: false, message: 'Not authenticated' }); return; }
+//   if (req.user.role === 'admin' || req.user.role === 'superadmin') { next(); return; }
 
-  const courseId = req.params.courseId || req.params.id;
-  const owned = req.user.courses.some(c => c.courseId === courseId);
-  if (!owned) {
-    res.status(403).json({ success: false, message: 'You must purchase this course to access this content' });
-    return;
-  }
-  next();
-}
+//   const courseId = req.params.courseId || req.params.id;
+//   const owned = req.user.courses.some(c => c.courseId === courseId);
+//   if (!owned) {
+//     res.status(403).json({ success: false, message: 'You must purchase this course to access this content' });
+//     return;
+//   }
+//   next();
+// }
 
 // ── Multer Upload ─────────────────────────────────────────────────────────────
 export const upload = multer({
