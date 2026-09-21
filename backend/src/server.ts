@@ -21,7 +21,7 @@ import courseRoutes from "./routes/course.routes";
 import programRoutes from "./routes/program.routes";
 import userRoutes from "./routes/user.routes";
 import applicationRoutes from "./routes/application.route";
-
+import dashboardRoutes from "./routes/dashboard.routes";
 const app = express();
 
 app.disable("x-powered-by");
@@ -99,6 +99,10 @@ app.use("/api/v1/programs", programRoutes);
 app.use("/api/v1/courses", courseRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/applications", applicationRoutes);
+app.use(
+  "/api/v1/dashboard",
+  dashboardRoutes
+);
 // ---------- Central Error Handler ----------
 
 app.use(errorMiddleware);

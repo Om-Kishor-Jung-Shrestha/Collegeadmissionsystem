@@ -7,8 +7,8 @@ import {
   updateCourse,
   deleteCourse,
 } from "../controllers/course.controller";
-
 import { asyncHandler } from "../middleware/async-handler.middleware.ts";
+
 import { validateDto } from "../middleware/validate.middleware";
 import { validateParamsDto } from "../middleware/validate-params.middleware";
 import { authenticate } from "../middleware/authenticate.middleware";
