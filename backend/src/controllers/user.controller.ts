@@ -26,13 +26,57 @@ function getSingleParam(
   return value ?? "";
 }
 
+// export async function getUsers(
+//   req: Request,
+//   res: Response
+// ): Promise<void> {
+//   const query = req.query as unknown as UserQueryDto;
+
+//   const result = await getUsersService(query);
+
+//   res.apiSuccess(
+//     result,
+//     "Users retrieved successfully"
+//   );
+// }
+
+// export async function getUser(
+//   req: Request,
+//   res: Response
+// ): Promise<void> {
+//   const userId = getSingleParam(req.params.id);
+
+//   const user = await getUserService(userId);
+
+//   res.apiSuccess(
+//     user,
+//     "User retrieved successfully"
+//   );
+// }
+
+
+
 export async function getUsers(
   req: Request,
   res: Response
 ): Promise<void> {
+  const actorRole = req.user?.role;
+
+  if (!actorRole) {
+    res.apiError(
+      "Authentication required",
+      401,
+      "AUTHENTICATION_REQUIRED"
+    );
+    return;
+  }
+
   const query = req.query as unknown as UserQueryDto;
 
-  const result = await getUsersService(query);
+  const result = await getUsersService(
+    query,
+    actorRole
+  );
 
   res.apiSuccess(
     result,
@@ -44,15 +88,30 @@ export async function getUser(
   req: Request,
   res: Response
 ): Promise<void> {
+  const actorRole = req.user?.role;
+
+  if (!actorRole) {
+    res.apiError(
+      "Authentication required",
+      401,
+      "AUTHENTICATION_REQUIRED"
+    );
+    return;
+  }
+
   const userId = getSingleParam(req.params.id);
 
-  const user = await getUserService(userId);
+  const user = await getUserService(
+    userId,
+    actorRole
+  );
 
   res.apiSuccess(
     user,
     "User retrieved successfully"
   );
 }
+
 
 export async function updateUserStatus(
   req: Request,

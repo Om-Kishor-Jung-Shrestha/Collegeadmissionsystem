@@ -24,6 +24,9 @@ import applicationRoutes from "./routes/application.route";
 import dashboardRoutes from "./routes/dashboard.routes";
 import { configureCloudinary } from "./config/cloudinary";
 // import { configureCloudinary } from "./configservices/cloudinary.config";
+
+import userProfileRoute from "./routes/user-profile.route";
+
 const app = express();
 
 app.disable("x-powered-by");
@@ -93,19 +96,40 @@ app.get("/", (_req, res) => {
 app.use(requestLoggerMiddleware);
 // ---------- Routes ----------
 
+// app.use(
+//   "/api/v1/auth",
+//   authRoutes
+// );
+// app.use("/api/v1/programs", programRoutes);
+// app.use("/api/v1/courses", courseRoutes);
+// app.use("/api/v1/users", userRoutes);
+// app.use("/api/v1/applications", applicationRoutes);
+// app.use(
+//   "/api/v1/dashboard",
+//   dashboardRoutes
+// );
+// app.use("/api/users/profile", userProfileRoute);
+// // ---------- Central Error Handler ----------
 app.use(
   "/api/v1/auth",
   authRoutes
 );
+
 app.use("/api/v1/programs", programRoutes);
+
 app.use("/api/v1/courses", courseRoutes);
+
+// Profile must come before /users because /users has /:id
+app.use("/api/v1/users/profile", userProfileRoute);
+
 app.use("/api/v1/users", userRoutes);
+
 app.use("/api/v1/applications", applicationRoutes);
+
 app.use(
   "/api/v1/dashboard",
   dashboardRoutes
 );
-// ---------- Central Error Handler ----------
 
 app.use(errorMiddleware);
 

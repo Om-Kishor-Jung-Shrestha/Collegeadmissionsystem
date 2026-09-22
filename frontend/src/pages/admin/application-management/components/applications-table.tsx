@@ -1,5 +1,8 @@
-import { Link } from "react-router-dom";
+
+import { Link, useLocation } from "react-router-dom";
+
 import type { ApplicationResponseDto } from "@/features/application/types/application.types";
+
 import { ApplicationStatusBadge } from "./application-status-badge";
 
 interface ApplicationsTableProps {
@@ -43,6 +46,11 @@ export function ApplicationsTable({
   limit = 10,
   onPageChange,
 }: ApplicationsTableProps) {
+  const location = useLocation();
+
+  const isAdminApplicationPage =
+    location.pathname.startsWith("/admin/applications");
+
   if (isLoading) {
     return (
       <div className="overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
@@ -134,6 +142,10 @@ export function ApplicationsTable({
               const applicantImageUrl =
                 application.applicantImage?.url;
 
+              const detailsPath = isAdminApplicationPage
+                ? `/admin/applications/${application.id}`
+                : `/applications/${application.id}`;
+
               return (
                 <tr
                   key={application.id}
@@ -204,7 +216,7 @@ export function ApplicationsTable({
 
                   <td className="px-5 py-4 text-right">
                     <Link
-                      to={`/admin/applications/${application.id}`}
+                      to={detailsPath}
                       className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-stone-700 transition hover:bg-stone-100 hover:text-stone-950 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white"
                     >
                       View
