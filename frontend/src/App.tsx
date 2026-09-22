@@ -1,135 +1,137 @@
-// import { Route, Routes } from "react-router-dom";
 
-// import { PublicLayout } from "@/layouts/PublicLayout/PublicLayout";
-// import { HomePage } from "@/pages/public/HomePage";
-// import { AboutPage } from "@/pages/public/AboutPage";
-// import { ProgramsPage } from "@/pages/public/ProgramsPage";
-// import { ContactPage } from "@/pages/public/ContactPage";
-
-// function App() {
-//   return (
-//     <Routes>
-//       <Route element={<PublicLayout />}>
-//         <Route path="/" element={<HomePage />} />
-//         <Route path="/about" element={<AboutPage />} />
-//         <Route path="/programs" element={<ProgramsPage />} />
-//         <Route path="/contact" element={<ContactPage />} />
-//       </Route>
-//     </Routes>
-//   );
-// }
-
-// export default App;
 
 
 // import { Navigate, Route, Routes } from "react-router-dom";
 
 // import { PublicLayout } from "@/layouts/PublicLayout/PublicLayout";
-// import { AdminLayout } from "@/layouts/AdminLayout/AdminLayout";
+// import { DashboardLayout } from "@/layouts/DashboardLayout/DashboardLayout";
 
 // import { HomePage } from "@/pages/public/HomePage";
 // import { AboutPage } from "@/pages/public/AboutPage";
 // import { ProgramsPage } from "@/pages/public/ProgramsPage";
 // import { ContactPage } from "@/pages/public/ContactPage";
+// import { AdmissionPage } from "@/pages/public/AdmissionPage";
 
 // import { LoginPage } from "@/pages/auth/LoginPage";
 // import { SignupPage } from "@/pages/auth/SignupPage";
 // import { VerifyOtpPage } from "@/pages/auth/VerifyOtpPage";
 
 // import { DashboardPage } from "@/pages/admin/DashboardPage";
+// import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
+
+// import { CourseBuilderPage } from "@/pages/admin/courses/CourseBuilderPage";
+// // import CourseManagementPage from "@/pages/admin/courses/course-management/CourseManagementPage";
+// import { CourseDetailsPage } from "@/pages/admin/courses/CourseDetailsPage";
 
 // import { ProtectedRoute } from "./routes/ProtectedRoute";
 // import { ProtectedAdminRoute } from "./routes/ProtectedAdminRoute";
 // import { GuestRoute } from "./routes/GuestRoute";
+// import CourseManagementPage from "./pages/admin/courses/ course-management/CourseManagementPage";
 
 // function App() {
 //   return (
 //     <Routes>
-//       {/* ==================== PUBLIC ROUTES ==================== */}
+//       {/* Public */}
 //       <Route element={<PublicLayout />}>
 //         <Route path="/" element={<HomePage />} />
-
 //         <Route path="/about" element={<AboutPage />} />
-
 //         <Route path="/programs" element={<ProgramsPage />} />
-
 //         <Route path="/contact" element={<ContactPage />} />
+//         <Route path="/admission" element={<AdmissionPage />} />
 //       </Route>
 
-//       {/* ==================== GUEST ROUTES ==================== */}
+//       {/* Guest */}
 //       <Route element={<GuestRoute />}>
 //         <Route path="/login" element={<LoginPage />} />
-
 //         <Route path="/signup" element={<SignupPage />} />
-
-//         <Route path="/verify-otp" element={<VerifyOtpPage />} />
-//       </Route>
-
-//       {/* ==================== AUTHENTICATED ROUTES ==================== */}
-//       {/* Accessible by user, admin and superadmin */}
-//       <Route element={<ProtectedRoute />}>
 //         <Route
-//           path="/dashboard"
-//           element={<DashboardPage />}
+//           path="/verify-otp"
+//           element={<VerifyOtpPage />}
 //         />
 //       </Route>
 
-//       {/* ==================== ADMIN ROUTES ==================== */}
-//       {/* Accessible only by admin and superadmin */}
-//       <Route element={<ProtectedAdminRoute />}>
-//         <Route path="/admin" element={<AdminLayout />}>
-//           {/* /admin -> /admin/dashboard */}
+//       {/* Authenticated */}
+//       <Route element={<ProtectedRoute />}>
+//         <Route element={<DashboardLayout />}>
 //           <Route
-//             index
-//             element={
-//               <Navigate
-//                 to="/admin/dashboard"
-//                 replace
-//               />
-//             }
-//           />
-
-//           {/* Admin dashboard */}
-//           <Route
-//             path="dashboard"
+//             path="/dashboard"
 //             element={<DashboardPage />}
 //           />
 
-//           {/* Applications */}
 //           <Route
-//             path="applications"
-//             element={<div>Applications</div>}
+//             path="/applications"
+//             element={
+//               <div className="p-8">
+//                 Applications
+//               </div>
+//             }
 //           />
 
-//           {/* Programs */}
 //           <Route
-//             path="programs"
-//             element={<div>Programs</div>}
+//             path="/profile"
+//             element={
+//               <div className="p-8">
+//                 Profile
+//               </div>
+//             }
 //           />
 
-//           {/* Users */}
-//           <Route
-//             path="users"
-//             element={<div>Users</div>}
-//           />
+//           {/* Admin only */}
+//           <Route element={<ProtectedAdminRoute />}>
+//             <Route
+//               path="/admin/programs"
+//               element={<ProgramsManagementPage />}
+//             />
 
-//           {/* Settings */}
-//           <Route
-//             path="settings"
-//             element={<div>Settings</div>}
-//           />
+//             {/* Course Management */}
+//             <Route
+//               path="/admin/courses"
+//               element={<CourseManagementPage />}
+//             />
+
+//             {/* Create Course */}
+//             <Route
+//               path="/admin/courses/new"
+//               element={<CourseBuilderPage />}
+//             />
+
+//             {/* View Course */}
+//             <Route
+//               path="/admin/courses/:id"
+//               element={<CourseDetailsPage />}
+//             />
+
+//             {/* Edit Course */}
+//             <Route
+//               path="/admin/courses/:id/edit"
+//               element={<CourseBuilderPage />}
+//             />
+
+//             <Route
+//               path="/admin/users"
+//               element={
+//                 <div className="p-8">
+//                   Users
+//                 </div>
+//               }
+//             />
+
+//             <Route
+//               path="/admin/settings"
+//               element={
+//                 <div className="p-8">
+//                   Settings
+//                 </div>
+//               }
+//             />
+//           </Route>
 //         </Route>
 //       </Route>
 
-//       {/* ==================== FALLBACK ==================== */}
+//       {/* Fallback */}
 //       <Route
 //         path="*"
-//         element={
-//           <Navigate
-//             to="/"
-//             replace
-//           />
-//         }
+//         element={<Navigate to="/" replace />}
 //       />
 //     </Routes>
 //   );
@@ -157,52 +159,99 @@ import { DashboardPage } from "@/pages/admin/DashboardPage";
 import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
 
 import { CourseBuilderPage } from "@/pages/admin/courses/CourseBuilderPage";
-// import CourseManagementPage from "@/pages/admin/courses/course-management/CourseManagementPage";
 import { CourseDetailsPage } from "@/pages/admin/courses/CourseDetailsPage";
+
+import CourseManagementPage from "./pages/admin/courses/ course-management/CourseManagementPage";
+
+// import { ApplicationManagementProgram } from "@/pages/admin/application-management/application-management-program";
+// import { ApplicationDetailsPage } from "@/pages/admin/application-management/application-details-page";
 
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { ProtectedAdminRoute } from "./routes/ProtectedAdminRoute";
 import { GuestRoute } from "./routes/GuestRoute";
-import CourseManagementPage from "./pages/admin/courses/ course-management/CourseManagementPage";
+import ApplicationManagementProgram from "./pages/admin/application-management/application-management-program";
+import ApplicationDetailsPage from "./pages/admin/application-management/ application-details-page";
 
 function App() {
   return (
     <Routes>
-      {/* Public */}
+      {/* =====================================================
+          PUBLIC
+      ===================================================== */}
+
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/programs" element={<ProgramsPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/admission" element={<AdmissionPage />} />
+        <Route
+          path="/"
+          element={<HomePage />}
+        />
+
+        <Route
+          path="/about"
+          element={<AboutPage />}
+        />
+
+        <Route
+          path="/programs"
+          element={<ProgramsPage />}
+        />
+
+        <Route
+          path="/contact"
+          element={<ContactPage />}
+        />
+
+        <Route
+          path="/admission"
+          element={<AdmissionPage />}
+        />
       </Route>
 
-      {/* Guest */}
+      {/* =====================================================
+          GUEST
+      ===================================================== */}
+
       <Route element={<GuestRoute />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
+
+        <Route
+          path="/signup"
+          element={<SignupPage />}
+        />
+
         <Route
           path="/verify-otp"
           element={<VerifyOtpPage />}
         />
       </Route>
 
-      {/* Authenticated */}
+      {/* =====================================================
+          AUTHENTICATED
+      ===================================================== */}
+
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
+          {/* Dashboard */}
+
           <Route
             path="/dashboard"
             element={<DashboardPage />}
           />
 
+          {/* Normal authenticated applications page */}
+
           <Route
             path="/applications"
             element={
-              <div className="p-8">
-                Applications
-              </div>
+              
+                <ApplicationManagementProgram />
+              
             }
           />
+
+          {/* Profile */}
 
           <Route
             path="/profile"
@@ -213,36 +262,77 @@ function App() {
             }
           />
 
-          {/* Admin only */}
+          {/* =================================================
+              ADMIN ONLY
+          ================================================= */}
+
           <Route element={<ProtectedAdminRoute />}>
+            {/* Application Management */}
+
             <Route
-              path="/admin/programs"
-              element={<ProgramsManagementPage />}
+              path="/admin/applications"
+              element={
+                <ApplicationManagementProgram />
+              }
             />
 
-            {/* Course Management */}
+            {/* Application Details */}
+
+            <Route
+              path="/admin/applications/:id"
+              element={
+                <ApplicationDetailsPage />
+              }
+            />
+
+            {/* Programs */}
+
+            <Route
+              path="/admin/programs"
+              element={
+                <ProgramsManagementPage />
+              }
+            />
+
+            {/* =================================================
+                COURSE MANAGEMENT
+            ================================================= */}
+
             <Route
               path="/admin/courses"
-              element={<CourseManagementPage />}
+              element={
+                <CourseManagementPage />
+              }
             />
 
             {/* Create Course */}
+
             <Route
               path="/admin/courses/new"
-              element={<CourseBuilderPage />}
+              element={
+                <CourseBuilderPage />
+              }
             />
 
             {/* View Course */}
+
             <Route
               path="/admin/courses/:id"
-              element={<CourseDetailsPage />}
+              element={
+                <CourseDetailsPage />
+              }
             />
 
             {/* Edit Course */}
+
             <Route
               path="/admin/courses/:id/edit"
-              element={<CourseBuilderPage />}
+              element={
+                <CourseBuilderPage />
+              }
             />
+
+            {/* Users */}
 
             <Route
               path="/admin/users"
@@ -252,6 +342,8 @@ function App() {
                 </div>
               }
             />
+
+            {/* Settings */}
 
             <Route
               path="/admin/settings"
@@ -265,10 +357,18 @@ function App() {
         </Route>
       </Route>
 
-      {/* Fallback */}
+      {/* =====================================================
+          FALLBACK
+      ===================================================== */}
+
       <Route
         path="*"
-        element={<Navigate to="/" replace />}
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
       />
     </Routes>
   );

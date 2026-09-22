@@ -1,22 +1,40 @@
+
+
 // import { Types } from "mongoose";
 
 // import type {
 //   ApplicationResponseDto,
 //   CreateApplicationDto,
 //   ListApplicationsQueryDto,
-//   UpdateApplicationDto,
 // } from "../dtos/application.dtos";
 
 // import type {
 //   ApplicationStatus,
+//   ApplicationIntake,
 //   IApplication,
 // } from "../models/application.model";
 
-// /*
-// |--------------------------------------------------------------------------
-// | Entity -> Response DTO
-// |--------------------------------------------------------------------------
-// */
+// export const toApplicationFileDto = (
+//   file: IApplication["documents"]["citizenship"]
+// ): ApplicationResponseDto["documents"]["citizenship"] => ({
+//   storage: file.storage,
+//   public_id: file.public_id,
+//   url: file.url,
+//   ...(file.path ? { path: file.path } : {}),
+//   resourceType: file.resourceType,
+//   format: file.format,
+// });
+
+// export const toApplicantImageDto = (
+//   file: IApplication["applicantImage"]
+// ): ApplicationResponseDto["applicantImage"] => ({
+//   storage: file.storage,
+//   public_id: file.public_id,
+//   url: file.url,
+//   ...(file.path ? { path: file.path } : {}),
+//   resourceType: file.resourceType,
+//   format: file.format,
+// });
 
 // export const toApplicationResponseDto = (
 //   application: IApplication
@@ -24,14 +42,18 @@
 //   id: application._id.toString(),
 
 //   firstName: application.firstName,
+
 //   middleName:
 //     application.middleName || undefined,
+
 //   lastName: application.lastName,
 
 //   email: application.email,
+
 //   phone: application.phone,
 
-//   program: application.program.toString(),
+//   program:
+//     application.program.toString(),
 
 //   admissionSession:
 //     application.admissionSession,
@@ -44,89 +66,59 @@
 
 //   academicHistory: {
 //     collegeOrSchool:
-//       application.academicHistory.collegeOrSchool,
+//       application.academicHistory
+//         .collegeOrSchool,
 
-//     board: application.academicHistory.board,
+//     board:
+//       application.academicHistory.board,
 
 //     gradeOrGpa:
 //       application.academicHistory.gradeOrGpa,
 //   },
 
-//   address: application.address,
+//   address:
+//     application.address,
 
-//   status: application.status,
+//   status:
+//     application.status,
 
 //   documents: {
-//     citizenship: {
-//       public_id:
-//         application.documents.citizenship.public_id,
-//       url:
-//         application.documents.citizenship.url,
-//       resourceType:
-//         application.documents.citizenship.resourceType,
-//       format:
-//         application.documents.citizenship.format,
-//     },
+//     citizenship:
+//       toApplicationFileDto(
+//         application.documents.citizenship
+//       ),
 
-//     cover: {
-//       public_id:
-//         application.documents.cover.public_id,
-//       url:
-//         application.documents.cover.url,
-//       resourceType:
-//         application.documents.cover.resourceType,
-//       format:
-//         application.documents.cover.format,
-//     },
+//     cover:
+//       toApplicationFileDto(
+//         application.documents.cover
+//       ),
 
-//     characterCertificate: {
-//       public_id:
-//         application.documents.characterCertificate.public_id,
-//       url:
-//         application.documents.characterCertificate.url,
-//       resourceType:
-//         application.documents.characterCertificate.resourceType,
-//       format:
-//         application.documents.characterCertificate.format,
-//     },
+//     characterCertificate:
+//       toApplicationFileDto(
+//         application.documents
+//           .characterCertificate
+//       ),
 
-//     document: {
-//       public_id:
-//         application.documents.document.public_id,
-//       url:
-//         application.documents.document.url,
-//       resourceType:
-//         application.documents.document.resourceType,
-//       format:
-//         application.documents.document.format,
-//     },
+//     document:
+//       toApplicationFileDto(
+//         application.documents.document
+//       ),
 
-//     marksheet12: {
-//       public_id:
-//         application.documents.marksheet12.public_id,
-//       url:
-//         application.documents.marksheet12.url,
-//       resourceType:
-//         application.documents.marksheet12.resourceType,
-//       format:
-//         application.documents.marksheet12.format,
-//     },
+//     marksheet12:
+//       toApplicationFileDto(
+//         application.documents.marksheet12
+//       ),
 //   },
 
-//   applicantImage: {
-//     public_id:
-//       application.applicantImage.public_id,
-//     url:
-//       application.applicantImage.url,
-//     resourceType:
-//       application.applicantImage.resourceType,
-//     format:
-//       application.applicantImage.format,
-//   },
+//   applicantImage:
+//     toApplicantImageDto(
+//       application.applicantImage
+//     ),
 
-//   createdBy: application.createdBy
-//     ? application.createdBy.toString()
-//     : undefined,
+//   createdBy:
+//     application.createdBy
+//       ? application.createdBy.toString()
+//       : undefined,
 
 //   createdAt:
 //     application.createdAt.toISOString(),
@@ -135,117 +127,86 @@
 //     application.updatedAt.toISOString(),
 // });
 
-// /*
-// |--------------------------------------------------------------------------
-// | Create DTO -> Model Input
-// |--------------------------------------------------------------------------
-// */
+// export interface PaginatedApplicationsResponseDto {
+//   data: ApplicationResponseDto[];
+//   meta: {
+//     total: number;
+//     page: number;
+//     limit: number;
+//     totalPages: number;
+//     hasNextPage: boolean;
+//     hasPreviousPage: boolean;
+//   };
+// }
+
+// export const toPaginatedApplicationsDto = (
+//   items: IApplication[],
+//   total: number,
+//   page: number,
+//   limit: number
+// ): PaginatedApplicationsResponseDto => {
+//   const totalPages =
+//     Math.ceil(total / limit);
+
+//   return {
+//     data: items.map(
+//       toApplicationResponseDto
+//     ),
+
+//     meta: {
+//       total,
+//       page,
+//       limit,
+//       totalPages,
+//       hasNextPage:
+//         page < totalPages,
+//       hasPreviousPage:
+//         page > 1,
+//     },
+//   };
+// };
 
 // export const toApplicationInput = (
 //   dto: CreateApplicationDto,
 //   createdBy?: string
 // ): Partial<IApplication> => ({
-//   firstName: dto.firstName.trim(),
+//   firstName: dto.firstName,
 
 //   middleName:
-//     dto.middleName?.trim() ?? "",
+//     dto.middleName,
 
-//   lastName: dto.lastName.trim(),
+//   lastName: dto.lastName,
 
-//   email: dto.email.trim().toLowerCase(),
+//   email: dto.email,
 
-//   phone: dto.phone.trim(),
+//   phone: dto.phone,
 
-//   program: new Types.ObjectId(dto.program),
+//   program:
+//     new Types.ObjectId(dto.program),
 
 //   admissionSession:
-//     dto.admissionSession.trim(),
+//     dto.admissionSession,
 
 //   admissionIntake:
 //     dto.admissionIntake,
 
 //   academicQualification:
-//     dto.academicQualification.trim(),
+//     dto.academicQualification,
 
 //   academicHistory: {
 //     collegeOrSchool:
-//       dto.academicHistory.collegeOrSchool.trim(),
+//       dto.academicHistory
+//         .collegeOrSchool,
 
-//     board: dto.academicHistory.board,
+//     board:
+//       dto.academicHistory.board,
 
 //     gradeOrGpa:
-//       dto.academicHistory.gradeOrGpa.trim(),
+//       dto.academicHistory.gradeOrGpa,
 //   },
 
-//   address: dto.address.trim(),
-
-//   documents: {
-//     citizenship: {
-//       public_id:
-//         dto.documents.citizenship.public_id,
-//       url:
-//         dto.documents.citizenship.url,
-//       resourceType:
-//         dto.documents.citizenship.resourceType,
-//       format:
-//         dto.documents.citizenship.format,
-//     },
-
-//     cover: {
-//       public_id:
-//         dto.documents.cover.public_id,
-//       url:
-//         dto.documents.cover.url,
-//       resourceType:
-//         dto.documents.cover.resourceType,
-//       format:
-//         dto.documents.cover.format,
-//     },
-
-//     characterCertificate: {
-//       public_id:
-//         dto.documents.characterCertificate.public_id,
-//       url:
-//         dto.documents.characterCertificate.url,
-//       resourceType:
-//         dto.documents.characterCertificate.resourceType,
-//       format:
-//         dto.documents.characterCertificate.format,
-//     },
-
-//     document: {
-//       public_id:
-//         dto.documents.document.public_id,
-//       url:
-//         dto.documents.document.url,
-//       resourceType:
-//         dto.documents.document.resourceType,
-//       format:
-//         dto.documents.document.format,
-//     },
-
-//     marksheet12: {
-//       public_id:
-//         dto.documents.marksheet12.public_id,
-//       url:
-//         dto.documents.marksheet12.url,
-//       resourceType:
-//         dto.documents.marksheet12.resourceType,
-//       format:
-//         dto.documents.marksheet12.format,
-//     },
-//   },
-
-//   applicantImage: {
-//     public_id:
-//       dto.applicantImage.public_id,
-//     url:
-//       dto.applicantImage.url,
-//     resourceType:
-//       dto.applicantImage.resourceType,
-//     format:
-//       dto.applicantImage.format,
-//   },
+//   address:
+//     dto.address,
 
 //   ...(dto.status
 //     ? {
@@ -256,180 +217,18 @@
 //   ...(createdBy
 //     ? {
 //         createdBy:
-//           new Types.ObjectId(createdBy),
+//           new Types.ObjectId(
+//             createdBy
+//           ),
 //       }
 //     : {}),
 // });
 
-// /*
-// |--------------------------------------------------------------------------
-// | Update DTO -> Model Update
-// |--------------------------------------------------------------------------
-// */
-
-// export const toApplicationUpdate = (
-//   dto: UpdateApplicationDto
-// ): Partial<IApplication> => {
-//   const update: Partial<IApplication> = {};
-
-//   if (dto.firstName !== undefined) {
-//     update.firstName = dto.firstName.trim();
-//   }
-
-//   if (dto.middleName !== undefined) {
-//     update.middleName = dto.middleName.trim();
-//   }
-
-//   if (dto.lastName !== undefined) {
-//     update.lastName = dto.lastName.trim();
-//   }
-
-//   if (dto.email !== undefined) {
-//     update.email = dto.email.trim().toLowerCase();
-//   }
-
-//   if (dto.phone !== undefined) {
-//     update.phone = dto.phone.trim();
-//   }
-
-//   if (dto.program !== undefined) {
-//     update.program =
-//       new Types.ObjectId(dto.program);
-//   }
-
-//   if (dto.admissionSession !== undefined) {
-//     update.admissionSession =
-//       dto.admissionSession.trim();
-//   }
-
-//   if (dto.admissionIntake !== undefined) {
-//     update.admissionIntake =
-//       dto.admissionIntake;
-//   }
-
-//   if (
-//     dto.academicQualification !==
-//     undefined
-//   ) {
-//     update.academicQualification =
-//       dto.academicQualification.trim();
-//   }
-
-//   if (dto.academicHistory !== undefined) {
-//     update.academicHistory = {
-//       collegeOrSchool:
-//         dto.academicHistory.collegeOrSchool.trim(),
-
-//       board:
-//         dto.academicHistory.board,
-
-//       gradeOrGpa:
-//         dto.academicHistory.gradeOrGpa.trim(),
-//     };
-//   }
-
-//   if (dto.address !== undefined) {
-//     update.address = dto.address.trim();
-//   }
-
-//   if (dto.documents !== undefined) {
-//     update.documents = {
-//       citizenship: {
-//         public_id:
-//           dto.documents.citizenship.public_id,
-//         url:
-//           dto.documents.citizenship.url,
-//         resourceType:
-//           dto.documents.citizenship.resourceType,
-//         format:
-//           dto.documents.citizenship.format,
-//       },
-
-//       cover: {
-//         public_id:
-//           dto.documents.cover.public_id,
-//         url:
-//           dto.documents.cover.url,
-//         resourceType:
-//           dto.documents.cover.resourceType,
-//         format:
-//           dto.documents.cover.format,
-//       },
-
-//       characterCertificate: {
-//         public_id:
-//           dto.documents.characterCertificate.public_id,
-//         url:
-//           dto.documents.characterCertificate.url,
-//         resourceType:
-//           dto.documents.characterCertificate.resourceType,
-//         format:
-//           dto.documents.characterCertificate.format,
-//       },
-
-//       document: {
-//         public_id:
-//           dto.documents.document.public_id,
-//         url:
-//           dto.documents.document.url,
-//         resourceType:
-//           dto.documents.document.resourceType,
-//         format:
-//           dto.documents.document.format,
-//       },
-
-//       marksheet12: {
-//         public_id:
-//           dto.documents.marksheet12.public_id,
-//         url:
-//           dto.documents.marksheet12.url,
-//         resourceType:
-//           dto.documents.marksheet12.resourceType,
-//         format:
-//           dto.documents.marksheet12.format,
-//       },
-//     };
-//   }
-
-//   if (dto.applicantImage !== undefined) {
-//     update.applicantImage = {
-//       public_id:
-//         dto.applicantImage.public_id,
-
-//       url:
-//         dto.applicantImage.url,
-
-//       resourceType:
-//         dto.applicantImage.resourceType,
-
-//       format:
-//         dto.applicantImage.format,
-//     };
-//   }
-
-//   if (dto.status !== undefined) {
-//     update.status = dto.status;
-//   }
-
-//   return update;
-// };
-
-// /*
-// |--------------------------------------------------------------------------
-// | Mongo Filter
-// |--------------------------------------------------------------------------
-// */
-
 // export interface ApplicationFilter {
 //   program?: Types.ObjectId;
-
 //   status?: ApplicationStatus;
-
 //   admissionSession?: string;
-
-//   admissionIntake?:
-//     IApplication["admissionIntake"];
-
+//   admissionIntake?: ApplicationIntake;
 //   $or?: Array<
 //     Record<string, RegExp>
 //   >;
@@ -450,16 +249,19 @@
 
 //   if (query.program) {
 //     filter.program =
-//       new Types.ObjectId(query.program);
+//       new Types.ObjectId(
+//         query.program
+//       );
 //   }
 
 //   if (query.status) {
-//     filter.status = query.status;
+//     filter.status =
+//       query.status;
 //   }
 
 //   if (query.admissionSession) {
 //     filter.admissionSession =
-//       query.admissionSession.trim();
+//       query.admissionSession;
 //   }
 
 //   if (query.admissionIntake) {
@@ -469,7 +271,9 @@
 
 //   if (query.search?.trim()) {
 //     const pattern = new RegExp(
-//       escapeRegex(query.search.trim()),
+//       escapeRegex(
+//         query.search.trim()
+//       ),
 //       "i"
 //     );
 
@@ -494,10 +298,10 @@
 
 //   return filter;
 // };
-
 import { Types } from "mongoose";
 
 import type {
+  ApplicationProgramResponseDto,
   ApplicationResponseDto,
   CreateApplicationDto,
   ListApplicationsQueryDto,
@@ -508,6 +312,37 @@ import type {
   ApplicationIntake,
   IApplication,
 } from "../models/application.model";
+
+/*
+|--------------------------------------------------------------------------
+| Populated Program
+|--------------------------------------------------------------------------
+*/
+
+export interface PopulatedApplicationProgram {
+  _id: Types.ObjectId;
+  mnemonic: string;
+  name: string;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Application With Populated Program
+|--------------------------------------------------------------------------
+*/
+
+export type ApplicationWithPopulatedProgram = Omit<
+  IApplication,
+  "program"
+> & {
+  program: PopulatedApplicationProgram;
+};
+
+/*
+|--------------------------------------------------------------------------
+| Application File
+|--------------------------------------------------------------------------
+*/
 
 export const toApplicationFileDto = (
   file: IApplication["documents"]["citizenship"]
@@ -520,6 +355,12 @@ export const toApplicationFileDto = (
   format: file.format,
 });
 
+/*
+|--------------------------------------------------------------------------
+| Applicant Image
+|--------------------------------------------------------------------------
+*/
+
 export const toApplicantImageDto = (
   file: IApplication["applicantImage"]
 ): ApplicationResponseDto["applicantImage"] => ({
@@ -531,8 +372,28 @@ export const toApplicantImageDto = (
   format: file.format,
 });
 
+/*
+|--------------------------------------------------------------------------
+| Program
+|--------------------------------------------------------------------------
+*/
+
+export const toApplicationProgramDto = (
+  program: PopulatedApplicationProgram
+): ApplicationProgramResponseDto => ({
+  id: program._id.toString(),
+  mnemonic: program.mnemonic,
+  name: program.name,
+});
+
+/*
+|--------------------------------------------------------------------------
+| Application Response
+|--------------------------------------------------------------------------
+*/
+
 export const toApplicationResponseDto = (
-  application: IApplication
+  application: ApplicationWithPopulatedProgram
 ): ApplicationResponseDto => ({
   id: application._id.toString(),
 
@@ -547,8 +408,9 @@ export const toApplicationResponseDto = (
 
   phone: application.phone,
 
-  program:
-    application.program.toString(),
+  program: toApplicationProgramDto(
+    application.program
+  ),
 
   admissionSession:
     application.admissionSession,
@@ -571,11 +433,9 @@ export const toApplicationResponseDto = (
       application.academicHistory.gradeOrGpa,
   },
 
-  address:
-    application.address,
+  address: application.address,
 
-  status:
-    application.status,
+  status: application.status,
 
   documents: {
     citizenship:
@@ -610,10 +470,9 @@ export const toApplicationResponseDto = (
       application.applicantImage
     ),
 
-  createdBy:
-    application.createdBy
-      ? application.createdBy.toString()
-      : undefined,
+  createdBy: application.createdBy
+    ? application.createdBy.toString()
+    : undefined,
 
   createdAt:
     application.createdAt.toISOString(),
@@ -622,8 +481,15 @@ export const toApplicationResponseDto = (
     application.updatedAt.toISOString(),
 });
 
+/*
+|--------------------------------------------------------------------------
+| Paginated Applications Response
+|--------------------------------------------------------------------------
+*/
+
 export interface PaginatedApplicationsResponseDto {
   data: ApplicationResponseDto[];
+
   meta: {
     total: number;
     page: number;
@@ -635,7 +501,7 @@ export interface PaginatedApplicationsResponseDto {
 }
 
 export const toPaginatedApplicationsDto = (
-  items: IApplication[],
+  items: ApplicationWithPopulatedProgram[],
   total: number,
   page: number,
   limit: number
@@ -650,16 +516,27 @@ export const toPaginatedApplicationsDto = (
 
     meta: {
       total,
+
       page,
+
       limit,
+
       totalPages,
+
       hasNextPage:
         page < totalPages,
+
       hasPreviousPage:
         page > 1,
     },
   };
 };
+
+/*
+|--------------------------------------------------------------------------
+| Application Input
+|--------------------------------------------------------------------------
+*/
 
 export const toApplicationInput = (
   dto: CreateApplicationDto,
@@ -667,8 +544,7 @@ export const toApplicationInput = (
 ): Partial<IApplication> => ({
   firstName: dto.firstName,
 
-  middleName:
-    dto.middleName,
+  middleName: dto.middleName,
 
   lastName: dto.lastName,
 
@@ -700,8 +576,7 @@ export const toApplicationInput = (
       dto.academicHistory.gradeOrGpa,
   },
 
-  address:
-    dto.address,
+  address: dto.address,
 
   ...(dto.status
     ? {
@@ -712,22 +587,36 @@ export const toApplicationInput = (
   ...(createdBy
     ? {
         createdBy:
-          new Types.ObjectId(
-            createdBy
-          ),
+          new Types.ObjectId(createdBy),
       }
     : {}),
 });
 
+/*
+|--------------------------------------------------------------------------
+| Application Filter
+|--------------------------------------------------------------------------
+*/
+
 export interface ApplicationFilter {
   program?: Types.ObjectId;
+
   status?: ApplicationStatus;
+
   admissionSession?: string;
+
   admissionIntake?: ApplicationIntake;
-  $or?: Array<
-    Record<string, RegExp>
+
+  $and?: Array<
+    Record<string, unknown>
   >;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Escape Regex
+|--------------------------------------------------------------------------
+*/
 
 export const escapeRegex = (
   value: string
@@ -737,10 +626,38 @@ export const escapeRegex = (
     String.raw`\$&`
   );
 
+/*
+|--------------------------------------------------------------------------
+| Application Filter Builder
+|--------------------------------------------------------------------------
+|
+| Separate filters are combined with AND.
+|
+| name:
+|   firstName OR middleName OR lastName
+|
+| email:
+|   partial, case-insensitive email match
+|
+| phone:
+|   partial, case-insensitive phone match
+|
+| search:
+|   legacy/general search across applicant fields
+|
+|--------------------------------------------------------------------------
+*/
+
 export const toApplicationFilter = (
   query: ListApplicationsQueryDto
 ): ApplicationFilter => {
   const filter: ApplicationFilter = {};
+
+  /*
+  |--------------------------------------------------------------------------
+  | Exact Application Filters
+  |--------------------------------------------------------------------------
+  */
 
   if (query.program) {
     filter.program =
@@ -764,6 +681,101 @@ export const toApplicationFilter = (
       query.admissionIntake;
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Text Filters
+  |--------------------------------------------------------------------------
+  */
+
+  const conditions: Array<
+    Record<string, unknown>
+  > = [];
+
+  /*
+  |--------------------------------------------------------------------------
+  | Name
+  |--------------------------------------------------------------------------
+  |
+  | Example:
+  | name=John
+  |
+  | Matches:
+  | John Doe
+  | Johnny Smith
+  | Jane John Doe
+  |
+  */
+
+  if (query.name?.trim()) {
+    const pattern = new RegExp(
+      escapeRegex(
+        query.name.trim()
+      ),
+      "i"
+    );
+
+    conditions.push({
+      $or: [
+        {
+          firstName: pattern,
+        },
+        {
+          middleName: pattern,
+        },
+        {
+          lastName: pattern,
+        },
+      ],
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Email
+  |--------------------------------------------------------------------------
+  */
+
+  if (query.email?.trim()) {
+    const pattern = new RegExp(
+      escapeRegex(
+        query.email.trim()
+      ),
+      "i"
+    );
+
+    conditions.push({
+      email: pattern,
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Phone
+  |--------------------------------------------------------------------------
+  */
+
+  if (query.phone?.trim()) {
+    const pattern = new RegExp(
+      escapeRegex(
+        query.phone.trim()
+      ),
+      "i"
+    );
+
+    conditions.push({
+      phone: pattern,
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Legacy General Search
+  |--------------------------------------------------------------------------
+  |
+  | Kept for API compatibility.
+  |
+  */
+
   if (query.search?.trim()) {
     const pattern = new RegExp(
       escapeRegex(
@@ -772,23 +784,40 @@ export const toApplicationFilter = (
       "i"
     );
 
-    filter.$or = [
-      {
-        firstName: pattern,
-      },
-      {
-        middleName: pattern,
-      },
-      {
-        lastName: pattern,
-      },
-      {
-        email: pattern,
-      },
-      {
-        phone: pattern,
-      },
-    ];
+    conditions.push({
+      $or: [
+        {
+          firstName: pattern,
+        },
+        {
+          middleName: pattern,
+        },
+        {
+          lastName: pattern,
+        },
+        {
+          email: pattern,
+        },
+        {
+          phone: pattern,
+        },
+      ],
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Combine Text Conditions
+  |--------------------------------------------------------------------------
+  |
+  | Using $and allows name, email and phone
+  | to work independently without one filter
+  | overwriting another $or condition.
+  |
+  */
+
+  if (conditions.length > 0) {
+    filter.$and = conditions;
   }
 
   return filter;

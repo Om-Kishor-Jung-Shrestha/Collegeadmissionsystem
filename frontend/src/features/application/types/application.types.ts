@@ -12,12 +12,6 @@ export interface AcademicHistoryDto {
   gradeOrGpa: string;
 }
 
-export interface AcademicHistoryDto {
-  collegeOrSchool: string;
-  board: HigherEducationBoard;
-  gradeOrGpa: string;
-}
-
 export interface CreateApplicationDto {
   firstName: string;
   middleName?: string;
@@ -54,6 +48,9 @@ export interface UpdateStatusDto {
 
 export interface ListApplicationsQueryDto {
   search?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
   program?: string;
   status?: ApplicationStatus;
   admissionSession?: string;
@@ -77,6 +74,12 @@ export interface ApplicationFileDto {
   format: string;
 }
 
+export interface ApplicationProgramResponseDto {
+  id: string;
+  mnemonic: string;
+  name: string;
+}
+
 export interface ApplicationResponseDto {
   id: string;
   firstName: string;
@@ -84,15 +87,11 @@ export interface ApplicationResponseDto {
   lastName: string;
   email: string;
   phone: string;
-  program: string;
+  program: ApplicationProgramResponseDto;
   admissionSession: string;
   admissionIntake: ApplicationIntake;
   academicQualification: string;
-  academicHistory: {
-    collegeOrSchool: string;
-    board: HigherEducationBoard;
-    gradeOrGpa: string;
-  };
+  academicHistory: AcademicHistoryDto;
   address: string;
   status: ApplicationStatus;
   documents: {
@@ -115,5 +114,7 @@ export interface PaginatedApplicationsResponseDto {
     page: number;
     limit: number;
     totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
   };
 }

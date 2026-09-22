@@ -387,6 +387,7 @@ import {
   UpdateStatusDto,
   ListApplicationsQueryDto,
   ApplicationIdParamDto,
+   ApplicationFileParamDto,
 } from "../dtos/application.dtos";
 
 import {
@@ -452,18 +453,25 @@ router.get(
  * ------------------------------------------------------
  */
 
+// router.get(
+//   "/:id/files/:field",
+//   authenticate,
+//   authorize(
+//     "user",
+//     "admin",
+//     "superadmin"
+//   ),
+//   validateParamsDto(ApplicationIdParamDto),
+//   getApplicationFile
+// );
+
 router.get(
   "/:id/files/:field",
   authenticate,
-  authorize(
-    "user",
-    "admin",
-    "superadmin"
-  ),
-  validateParamsDto(ApplicationIdParamDto),
+  authorize("user", "admin", "superadmin"),
+  validateParamsDto(ApplicationFileParamDto),
   getApplicationFile
 );
-
 /*
  * ------------------------------------------------------
  * Single application
