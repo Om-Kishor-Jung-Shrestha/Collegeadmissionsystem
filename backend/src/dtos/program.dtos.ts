@@ -70,10 +70,25 @@ export class ProgramIdParamDto {
 
 // ---------- Response DTO ----------
 
+// export interface ProgramResponseDto {
+//   id: string;
+//   mnemonic: string;
+//   name: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+// ---------- Response DTO ----------
+
+export interface ProgramCourseSummaryDto {
+  duration: string;
+  totalSemesters: number;
+}
+
 export interface ProgramResponseDto {
   id: string;
   mnemonic: string;
   name: string;
+  course: ProgramCourseSummaryDto | null;
   createdAt: string;
   updatedAt: string;
 }

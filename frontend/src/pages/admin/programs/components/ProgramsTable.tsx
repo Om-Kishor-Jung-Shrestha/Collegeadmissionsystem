@@ -111,7 +111,7 @@ export function ProgramsTable({
               </th>
 
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Course
+                Year & Semester
               </th>
 
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-stone-500">
@@ -143,9 +143,16 @@ export function ProgramsTable({
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-                    Not Added
-                  </span>
+                  {program.course ? (
+                    <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                      {program.course.duration} ·{" "}
+                      {program.course.totalSemesters} semesters
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+                      Not Added
+                    </span>
+                  )}
                 </td>
 
                 <td className="px-6 py-4 text-sm text-stone-500">

@@ -36,16 +36,28 @@ export interface ProgramsPaginationProps {
   onPageChange: (page: number) => void;
 }
 
+// export interface ProgramFormModalProps {
+//   open: boolean;
+//   editingProgram: ProgramResponseDto | null;
+//   form: CreateProgramDto;
+//   isSaving: boolean;
+//   onChange: Dispatch<SetStateAction<CreateProgramDto>>;
+//   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+//   onClose: () => void;
+// }
 export interface ProgramFormModalProps {
   open: boolean;
   editingProgram: ProgramResponseDto | null;
   form: CreateProgramDto;
   isSaving: boolean;
-  onChange: Dispatch<SetStateAction<CreateProgramDto>>;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onChange: Dispatch<
+    SetStateAction<CreateProgramDto>
+  >;
+  onSubmit: (
+    event: SubmitEvent,
+  ) => void;
   onClose: () => void;
 }
-
 export interface ProgramViewModalProps {
   program: ProgramResponseDto | null;
   onClose: () => void;

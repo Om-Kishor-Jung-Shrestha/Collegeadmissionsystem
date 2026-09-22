@@ -22,6 +22,8 @@ import programRoutes from "./routes/program.routes";
 import userRoutes from "./routes/user.routes";
 import applicationRoutes from "./routes/application.route";
 import dashboardRoutes from "./routes/dashboard.routes";
+import { configureCloudinary } from "./config/cloudinary";
+// import { configureCloudinary } from "./configservices/cloudinary.config";
 const app = express();
 
 app.disable("x-powered-by");
@@ -116,6 +118,7 @@ async function startServer(): Promise<void> {
     console.log("✅ MongoDB connected");
 
     await connectRedis();
+    configureCloudinary();
 
     console.log("✅ Redis connected");
 

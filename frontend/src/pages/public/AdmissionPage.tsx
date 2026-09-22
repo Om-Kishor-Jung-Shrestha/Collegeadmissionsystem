@@ -1,3 +1,4 @@
+
 import {
   type ChangeEvent,
   type ReactNode,
@@ -18,10 +19,7 @@ import {
 } from "lucide-react";
 
 import { useCreateApplicationMutation } from "@/features/application/api/application.api";
-
-/* =========================================================
-   TYPES
-========================================================= */
+import { useGetProgramsQuery } from "@/features/programs/api/program.api";
 
 type AdmissionStep = 1 | 2 | 3 | 4;
 
@@ -35,57 +33,53 @@ interface ApplicationFormData {
   program: string;
   admissionSession: string;
   admissionIntake: string;
-
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   address: string;
-
   academicQualification: string;
-
   academicHistory: AcademicHistoryFormData;
-
   applicantImage: File | null;
   citizenshipFile: File | null;
+  coverFile: File | null;
   characterCertificate: File | null;
   academicDocument: File | null;
   marksheet12: File | null;
 }
 
-/* =========================================================
-   INITIAL FORM
-========================================================= */
-
 const initialFormData: ApplicationFormData = {
   program: "",
   admissionSession: "",
   admissionIntake: "",
-
   firstName: "",
   lastName: "",
   email: "",
   phone: "",
   address: "",
-
   academicQualification: "",
-
   academicHistory: {
     collegeOrSchool: "",
     board: "",
     gradeOrGpa: "",
   },
-
   applicantImage: null,
   citizenshipFile: null,
+  coverFile: null,
   characterCertificate: null,
   academicDocument: null,
   marksheet12: null,
 };
 
-/* =========================================================
-   STEPS
-========================================================= */
+const currentYear = new Date().getFullYear();
+
+const admissionSessions = Array.from(
+  { length: 3 },
+  (_, index) => {
+    const year = currentYear + index;
+    return `${year}/${year + 1}`;
+  },
+);
 
 const steps = [
   {
@@ -114,35 +108,34 @@ const steps = [
   },
 ] as const;
 
-/* =========================================================
-   COMPONENT
-========================================================= */
-
 export function AdmissionPage() {
   const [currentStep, setCurrentStep] =
     useState<AdmissionStep>(1);
 
   const [formData, setFormData] =
-    useState<ApplicationFormData>(
-      initialFormData
-    );
+    useState<ApplicationFormData>(initialFormData);
 
-  const [submitted, setSubmitted] =
-    useState(false);
-
-  const [submitError, setSubmitError] =
-    useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [
     createApplication,
-    {
-      isLoading: isSubmitting,
-    },
+    { isLoading: isSubmitting },
   ] = useCreateApplicationMutation();
 
-  /* =======================================================
-     UPDATE TEXT FIELD
-  ======================================================= */
+  const {
+    data: programsData,
+    isLoading: isLoadingPrograms,
+    isError: isProgramsError,
+  } = useGetProgramsQuery({
+    page: 1,
+    limit: 100,
+  });
+
+  const programs = useMemo(
+    () => programsData?.items ?? [],
+    [programsData?.items],
+  );
 
   function updateField(
     field:
@@ -155,7 +148,7 @@ export function AdmissionPage() {
       | "phone"
       | "address"
       | "academicQualification",
-    value: string
+    value: string,
   ) {
     setFormData((current) => ({
       ...current,
@@ -165,16 +158,12 @@ export function AdmissionPage() {
     setSubmitError("");
   }
 
-  /* =======================================================
-     UPDATE ACADEMIC HISTORY
-  ======================================================= */
-
   function updateAcademicHistory(
     field:
       | "collegeOrSchool"
       | "board"
       | "gradeOrGpa",
-    value: string
+    value: string,
   ) {
     setFormData((current) => ({
       ...current,
@@ -187,18 +176,15 @@ export function AdmissionPage() {
     setSubmitError("");
   }
 
-  /* =======================================================
-     UPDATE FILE
-  ======================================================= */
-
   function updateFile(
     field:
       | "applicantImage"
       | "citizenshipFile"
+      | "coverFile"
       | "characterCertificate"
       | "academicDocument"
       | "marksheet12",
-    file: File | null
+    file: File | null,
   ) {
     setFormData((current) => ({
       ...current,
@@ -208,18 +194,12 @@ export function AdmissionPage() {
     setSubmitError("");
   }
 
-  /* =======================================================
-     VALIDATE CURRENT STEP
-  ======================================================= */
-
-  function validateStep(
-    step: AdmissionStep
-  ): boolean {
+  function validateStep(step: AdmissionStep): boolean {
     if (step === 1) {
       return Boolean(
         formData.program &&
           formData.admissionSession &&
-          formData.admissionIntake
+          formData.admissionIntake,
       );
     }
 
@@ -229,17 +209,16 @@ export function AdmissionPage() {
           formData.lastName &&
           formData.email &&
           formData.phone &&
-          formData.address
+          formData.address,
       );
     }
 
     if (step === 3) {
       return Boolean(
         formData.academicQualification &&
-          formData.academicHistory
-            .collegeOrSchool &&
+          formData.academicHistory.collegeOrSchool &&
           formData.academicHistory.board &&
-          formData.academicHistory.gradeOrGpa
+          formData.academicHistory.gradeOrGpa,
       );
     }
 
@@ -247,23 +226,40 @@ export function AdmissionPage() {
       return Boolean(
         formData.applicantImage &&
           formData.citizenshipFile &&
+          formData.coverFile &&
           formData.characterCertificate &&
           formData.academicDocument &&
-          formData.marksheet12
+          formData.marksheet12,
       );
     }
 
     return false;
   }
 
-  /* =======================================================
-     NEXT
-  ======================================================= */
-
   function goNext() {
+    if (
+      currentStep === 1 &&
+      isLoadingPrograms
+    ) {
+      setSubmitError(
+        "Please wait while the programs are loading.",
+      );
+      return;
+    }
+
+    if (
+      currentStep === 1 &&
+      isProgramsError
+    ) {
+      setSubmitError(
+        "Unable to load programs. Please refresh the page and try again.",
+      );
+      return;
+    }
+
     if (!validateStep(currentStep)) {
       setSubmitError(
-        "Please complete all required fields before continuing."
+        "Please complete all required fields before continuing.",
       );
       return;
     }
@@ -272,181 +268,145 @@ export function AdmissionPage() {
 
     if (currentStep < 4) {
       setCurrentStep(
-        (currentStep + 1) as AdmissionStep
+        (currentStep + 1) as AdmissionStep,
       );
     }
   }
-
-  /* =======================================================
-     BACK
-  ======================================================= */
 
   function goBack() {
     setSubmitError("");
 
     if (currentStep > 1) {
       setCurrentStep(
-        (currentStep - 1) as AdmissionStep
+        (currentStep - 1) as AdmissionStep,
       );
     }
   }
-
-  /* =======================================================
-     STEP NAVIGATION
-  ======================================================= */
 
   function goToStep(step: number) {
     if (step <= currentStep) {
       setSubmitError("");
-
-      setCurrentStep(
-        step as AdmissionStep
-      );
+      setCurrentStep(step as AdmissionStep);
     }
   }
-
-  /* =======================================================
-     BUILD FORM DATA
-  ======================================================= */
 
   function buildApplicationFormData() {
     const payload = new FormData();
 
-    /*
-     * Text fields expected by CreateApplicationDto
-     */
-
     payload.append(
       "firstName",
-      formData.firstName
+      formData.firstName,
     );
 
     payload.append(
       "lastName",
-      formData.lastName
+      formData.lastName,
     );
 
     payload.append(
       "email",
-      formData.email
+      formData.email,
     );
 
     payload.append(
       "phone",
-      formData.phone
+      formData.phone,
     );
 
     payload.append(
       "program",
-      formData.program
+      formData.program,
     );
 
     payload.append(
       "admissionSession",
-      formData.admissionSession
+      formData.admissionSession,
     );
 
     payload.append(
       "admissionIntake",
-      formData.admissionIntake
+      formData.admissionIntake,
     );
 
     payload.append(
       "academicQualification",
-      formData.academicQualification
+      formData.academicQualification,
     );
 
     payload.append(
       "address",
-      formData.address
+      formData.address,
     );
-
-    /*
-     * Nested academicHistory.
-     *
-     * These keys are intended to be parsed by the
-     * backend into:
-     *
-     * academicHistory: {
-     *   collegeOrSchool,
-     *   board,
-     *   gradeOrGpa
-     * }
-     */
 
     payload.append(
       "academicHistory[collegeOrSchool]",
-      formData.academicHistory
-        .collegeOrSchool
+      formData.academicHistory.collegeOrSchool,
     );
 
     payload.append(
       "academicHistory[board]",
-      formData.academicHistory.board
+      formData.academicHistory.board,
     );
 
     payload.append(
       "academicHistory[gradeOrGpa]",
-      formData.academicHistory
-        .gradeOrGpa
+      formData.academicHistory.gradeOrGpa,
     );
-
-    /*
-     * Files expected by application upload middleware.
-     */
 
     if (formData.applicantImage) {
       payload.append(
         "applicantImage",
-        formData.applicantImage
+        formData.applicantImage,
       );
     }
 
     if (formData.citizenshipFile) {
       payload.append(
         "citizenship",
-        formData.citizenshipFile
+        formData.citizenshipFile,
+      );
+    }
+
+    if (formData.coverFile) {
+      payload.append(
+        "cover",
+        formData.coverFile,
       );
     }
 
     if (formData.characterCertificate) {
       payload.append(
         "characterCertificate",
-        formData.characterCertificate
+        formData.characterCertificate,
       );
     }
 
     if (formData.academicDocument) {
       payload.append(
         "document",
-        formData.academicDocument
+        formData.academicDocument,
       );
     }
 
     if (formData.marksheet12) {
       payload.append(
         "marksheet12",
-        formData.marksheet12
+        formData.marksheet12,
       );
     }
 
     return payload;
   }
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
-
   async function handleSubmit(
-    event: SyntheticEvent<HTMLFormElement>
+    event: SyntheticEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
-
     setSubmitError("");
 
     if (!validateStep(4)) {
       setSubmitError(
-        "Please upload all required documents before submitting."
+        "Please upload all required documents before submitting.",
       );
       return;
     }
@@ -455,15 +415,13 @@ export function AdmissionPage() {
       const payload =
         buildApplicationFormData();
 
-      await createApplication(
-        payload
-      ).unwrap();
+      await createApplication(payload).unwrap();
 
       setSubmitted(true);
     } catch (error) {
       console.error(
         "Application submission failed:",
-        error
+        error,
       );
 
       const apiError = error as {
@@ -496,14 +454,10 @@ export function AdmissionPage() {
         validationMessages ||
           apiError.data?.message ||
           apiError.error ||
-          "Unable to submit the application. Please try again."
+          "Unable to submit the application. Please try again.",
       );
     }
   }
-
-  /* =======================================================
-     PROGRESS
-  ======================================================= */
 
   const progressWidth = useMemo(() => {
     if (currentStep === 1) {
@@ -521,14 +475,10 @@ export function AdmissionPage() {
     return "100%";
   }, [currentStep]);
 
-  /* =======================================================
-     SUCCESS
-  ======================================================= */
-
   if (submitted) {
     return (
-      <div className="min-h-[calc(100vh-72px)] bg-stone-50 px-4 py-10 dark:bg-stone-950 sm:px-6 lg:px-8">
-        <div className="mx-auto flex min-h-150 max-w-3xl items-center justify-center">
+      <div className="min-h-screen bg-stone-50 px-4 py-10 dark:bg-stone-950 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl items-center justify-center">
           <div className="w-full rounded-2xl border border-stone-200 bg-white p-8 text-center shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:p-12">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
               <Check className="h-8 w-8" />
@@ -538,7 +488,7 @@ export function AdmissionPage() {
               Application Submitted
             </h2>
 
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-stone-500">
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-stone-500 dark:text-stone-400">
               Your admission application has
               been submitted successfully. Our
               admission team will review your
@@ -551,7 +501,7 @@ export function AdmissionPage() {
                 Application status
               </p>
 
-              <p className="mt-1 text-sm font-semibold text-amber-600">
+              <p className="mt-1 text-sm font-semibold text-amber-600 dark:text-amber-400">
                 Pending Review
               </p>
             </div>
@@ -561,9 +511,7 @@ export function AdmissionPage() {
               onClick={() => {
                 setSubmitted(false);
                 setCurrentStep(1);
-                setFormData(
-                  initialFormData
-                );
+                setFormData(initialFormData);
                 setSubmitError("");
               }}
               className="mt-8 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
@@ -576,16 +524,9 @@ export function AdmissionPage() {
     );
   }
 
-  /* =======================================================
-     PAGE
-  ======================================================= */
-
   return (
-    <div className="min-h-[calc(100vh-72px)] bg-stone-50 px-4 py-8 dark:bg-stone-950 sm:px-6 lg:px-8 lg:py-12">
+    <div className="min-h-screen bg-stone-50 px-4 py-8 dark:bg-stone-950 sm:px-6 lg:px-8 lg:py-12">
       <div className="mx-auto w-full max-w-5xl">
-
-        {/* PAGE HEADER */}
-
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
             Admission Application
@@ -595,17 +536,14 @@ export function AdmissionPage() {
             Start Your Application
           </h1>
 
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-500 sm:text-base">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-stone-500 dark:text-stone-400 sm:text-base">
             Complete the application form below
             to begin your admission process.
           </p>
         </div>
 
-        {/* STEP NAVIGATION */}
-
         <div className="mt-10 rounded-2xl border border-stone-200 bg-white px-5 py-6 shadow-sm dark:border-stone-800 dark:bg-stone-900 sm:px-8">
           <div className="relative">
-
             <div className="absolute left-[12%] right-[12%] top-5 h-px bg-stone-200 dark:bg-stone-700" />
 
             <div
@@ -651,10 +589,7 @@ export function AdmissionPage() {
                     className="group flex flex-col items-center text-center disabled:cursor-default"
                   >
                     <div
-                      className={[
-                        "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all",
-                        indicatorClass,
-                      ].join(" ")}
+                      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${indicatorClass}`}
                     >
                       {isCompleted ? (
                         <Check className="h-4 w-4" />
@@ -664,18 +599,16 @@ export function AdmissionPage() {
                     </div>
 
                     <span
-                      className={[
-                        "mt-3 text-xs font-semibold sm:text-sm",
-                        isActive ||
-                        isCompleted
+                      className={`mt-3 text-xs font-semibold sm:text-sm ${
+                        isActive || isCompleted
                           ? "text-stone-900 dark:text-stone-100"
-                          : "text-stone-400",
-                      ].join(" ")}
+                          : "text-stone-400 dark:text-stone-500"
+                      }`}
                     >
                       {step.title}
                     </span>
 
-                    <span className="mt-1 hidden text-[11px] text-stone-400 sm:block">
+                    <span className="mt-1 hidden text-[11px] text-stone-400 dark:text-stone-500 sm:block">
                       {step.description}
                     </span>
                   </button>
@@ -685,41 +618,23 @@ export function AdmissionPage() {
           </div>
         </div>
 
-        {/* ERROR */}
-
         {submitError && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
             {submitError}
           </div>
         )}
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="mt-6"
         >
           <div className="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-
-            {/* =================================================
-                STEP 1
-            ================================================= */}
-
             {currentStep === 1 && (
               <StepContainer
                 title="Select Program"
-                description="Choose the program and admission intake you are applying for."
+                description="Choose the program, admission session, and intake you are applying for."
               >
                 <div className="space-y-6">
-
-                  {/*
-                   * IMPORTANT:
-                   * program must be a real MongoDB ObjectId.
-                   *
-                   * Replace these values with actual program IDs
-                   * returned from your Programs API.
-                   */}
-
                   <SelectField
                     label="Program"
                     required
@@ -727,19 +642,26 @@ export function AdmissionPage() {
                     onChange={(value) =>
                       updateField(
                         "program",
-                        value
+                        value,
                       )
                     }
                   >
                     <option value="">
-                      Select a program
+                      {isLoadingPrograms
+                        ? "Loading programs..."
+                        : isProgramsError
+                          ? "Unable to load programs"
+                          : "Select a program"}
                     </option>
 
-                    <option
-                      value="REPLACE_WITH_PROGRAM_ID"
-                    >
-                      Select configured program
-                    </option>
+                    {programs.map((program) => (
+                      <option
+                        key={program.id}
+                        value={program.id}
+                      >
+                        {program.mnemonic}
+                      </option>
+                    ))}
                   </SelectField>
 
                   <SelectField
@@ -751,7 +673,7 @@ export function AdmissionPage() {
                     onChange={(value) =>
                       updateField(
                         "admissionSession",
-                        value
+                        value,
                       )
                     }
                   >
@@ -759,13 +681,16 @@ export function AdmissionPage() {
                       Select session
                     </option>
 
-                    <option value="2026/2027">
-                      2026/2027
-                    </option>
-
-                    <option value="2027/2028">
-                      2027/2028
-                    </option>
+                    {admissionSessions.map(
+                      (session) => (
+                        <option
+                          key={session}
+                          value={session}
+                        >
+                          {session}
+                        </option>
+                      ),
+                    )}
                   </SelectField>
 
                   <SelectField
@@ -777,7 +702,7 @@ export function AdmissionPage() {
                     onChange={(value) =>
                       updateField(
                         "admissionIntake",
-                        value
+                        value,
                       )
                     }
                   >
@@ -785,11 +710,11 @@ export function AdmissionPage() {
                       Select intake
                     </option>
 
-                    <option value="spring">
+                    <option value="Spring">
                       Spring
                     </option>
 
-                    <option value="fall">
+                    <option value="Fall">
                       Fall
                     </option>
                   </SelectField>
@@ -797,27 +722,20 @@ export function AdmissionPage() {
               </StepContainer>
             )}
 
-            {/* =================================================
-                STEP 2
-            ================================================= */}
-
             {currentStep === 2 && (
               <StepContainer
                 title="Applicant Information"
                 description="Enter the applicant's personal and contact information."
               >
                 <div className="grid gap-6 md:grid-cols-2">
-
                   <InputField
                     label="First Name"
                     required
-                    value={
-                      formData.firstName
-                    }
+                    value={formData.firstName}
                     onChange={(value) =>
                       updateField(
                         "firstName",
-                        value
+                        value,
                       )
                     }
                     placeholder="Enter first name"
@@ -826,13 +744,11 @@ export function AdmissionPage() {
                   <InputField
                     label="Last Name"
                     required
-                    value={
-                      formData.lastName
-                    }
+                    value={formData.lastName}
                     onChange={(value) =>
                       updateField(
                         "lastName",
-                        value
+                        value,
                       )
                     }
                     placeholder="Enter last name"
@@ -842,13 +758,11 @@ export function AdmissionPage() {
                     label="Email"
                     type="email"
                     required
-                    value={
-                      formData.email
-                    }
+                    value={formData.email}
                     onChange={(value) =>
                       updateField(
                         "email",
-                        value
+                        value,
                       )
                     }
                     placeholder="you@example.com"
@@ -858,13 +772,11 @@ export function AdmissionPage() {
                     label="Phone"
                     type="tel"
                     required
-                    value={
-                      formData.phone
-                    }
+                    value={formData.phone}
                     onChange={(value) =>
                       updateField(
                         "phone",
-                        value
+                        value,
                       )
                     }
                     placeholder="+977 98XXXXXXXX"
@@ -874,13 +786,11 @@ export function AdmissionPage() {
                     <TextAreaField
                       label="Address"
                       required
-                      value={
-                        formData.address
-                      }
+                      value={formData.address}
                       onChange={(value) =>
                         updateField(
                           "address",
-                          value
+                          value,
                         )
                       }
                       placeholder="Enter your complete address"
@@ -891,29 +801,23 @@ export function AdmissionPage() {
               </StepContainer>
             )}
 
-            {/* =================================================
-                STEP 3
-            ================================================= */}
-
             {currentStep === 3 && (
               <StepContainer
                 title="Academic Information"
                 description="Provide information about your previous academic qualification."
               >
                 <div className="grid gap-6 md:grid-cols-2">
-
                   <div className="md:col-span-2">
                     <InputField
                       label="Academic Qualification"
                       required
                       value={
-                        formData
-                          .academicQualification
+                        formData.academicQualification
                       }
                       onChange={(value) =>
                         updateField(
                           "academicQualification",
-                          value
+                          value,
                         )
                       }
                       placeholder="e.g. +2 Science, A-Level, Diploma"
@@ -924,14 +828,13 @@ export function AdmissionPage() {
                     label="College / School"
                     required
                     value={
-                      formData
-                        .academicHistory
+                      formData.academicHistory
                         .collegeOrSchool
                     }
                     onChange={(value) =>
                       updateAcademicHistory(
                         "collegeOrSchool",
-                        value
+                        value,
                       )
                     }
                     placeholder="Enter college or school name"
@@ -941,14 +844,12 @@ export function AdmissionPage() {
                     label="Higher Education Board"
                     required
                     value={
-                      formData
-                        .academicHistory
-                        .board
+                      formData.academicHistory.board
                     }
                     onChange={(value) =>
                       updateAcademicHistory(
                         "board",
-                        value
+                        value,
                       )
                     }
                   >
@@ -956,25 +857,28 @@ export function AdmissionPage() {
                       Select board
                     </option>
 
-                    {/*
-                     * These values MUST match
-                     * HIGHER_EDUCATION_BOARDS
-                     * from application.model.ts.
-                     *
-                     * Replace/add the actual enum values
-                     * used by your backend.
-                     */}
-
                     <option value="NEB">
                       NEB
                     </option>
 
-                    <option value="CBSE">
-                      CBSE
+                    <option value="CTEVT">
+                      CTEVT
                     </option>
 
-                    <option value="A_LEVEL">
-                      A-Level
+                    <option value="TU">
+                      TU
+                    </option>
+
+                    <option value="KU">
+                      KU
+                    </option>
+
+                    <option value="PU">
+                      PU
+                    </option>
+
+                    <option value="Other">
+                      Other
                     </option>
                   </SelectField>
 
@@ -983,14 +887,13 @@ export function AdmissionPage() {
                       label="Grade / GPA"
                       required
                       value={
-                        formData
-                          .academicHistory
+                        formData.academicHistory
                           .gradeOrGpa
                       }
                       onChange={(value) =>
                         updateAcademicHistory(
                           "gradeOrGpa",
-                          value
+                          value,
                         )
                       }
                       placeholder="e.g. 3.45 or 78%"
@@ -1000,17 +903,12 @@ export function AdmissionPage() {
               </StepContainer>
             )}
 
-            {/* =================================================
-                STEP 4
-            ================================================= */}
-
             {currentStep === 4 && (
               <StepContainer
                 title="Upload Documents"
                 description="Upload the required documents for your admission application."
               >
                 <div className="space-y-5">
-
                   <FileUploadField
                     label="Applicant Image"
                     required
@@ -1020,7 +918,7 @@ export function AdmissionPage() {
                     onChange={(file) =>
                       updateFile(
                         "applicantImage",
-                        file
+                        file,
                       )
                     }
                     accept="image/*"
@@ -1035,7 +933,20 @@ export function AdmissionPage() {
                     onChange={(file) =>
                       updateFile(
                         "citizenshipFile",
-                        file
+                        file,
+                      )
+                    }
+                    accept="image/*,.pdf"
+                  />
+
+                  <FileUploadField
+                    label="Cover"
+                    required
+                    file={formData.coverFile}
+                    onChange={(file) =>
+                      updateFile(
+                        "coverFile",
+                        file,
                       )
                     }
                     accept="image/*,.pdf"
@@ -1050,7 +961,7 @@ export function AdmissionPage() {
                     onChange={(file) =>
                       updateFile(
                         "characterCertificate",
-                        file
+                        file,
                       )
                     }
                     accept="image/*,.pdf"
@@ -1065,7 +976,7 @@ export function AdmissionPage() {
                     onChange={(file) =>
                       updateFile(
                         "academicDocument",
-                        file
+                        file,
                       )
                     }
                     accept="image/*,.pdf"
@@ -1074,20 +985,16 @@ export function AdmissionPage() {
                   <FileUploadField
                     label="Marksheet"
                     required
-                    file={
-                      formData.marksheet12
-                    }
+                    file={formData.marksheet12}
                     onChange={(file) =>
                       updateFile(
                         "marksheet12",
-                        file
+                        file,
                       )
                     }
                     accept="image/*,.pdf"
                   />
                 </div>
-
-                {/* DECLARATION */}
 
                 <div className="mt-8 rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-700 dark:bg-stone-950">
                   <div className="flex gap-3">
@@ -1095,7 +1002,7 @@ export function AdmissionPage() {
                       id="declaration"
                       type="checkbox"
                       required
-                      className="mt-1 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                      className="mt-1 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500 dark:border-stone-600 dark:bg-stone-900"
                     />
 
                     <label
@@ -1116,16 +1023,11 @@ export function AdmissionPage() {
               </StepContainer>
             )}
 
-            {/* FOOTER */}
-
             <div className="flex items-center justify-between border-t border-stone-200 px-5 py-5 dark:border-stone-800 sm:px-8">
-
               <button
                 type="button"
                 onClick={goBack}
-                disabled={
-                  currentStep === 1
-                }
+                disabled={currentStep === 1}
                 className={[
                   "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
                   currentStep === 1
@@ -1141,18 +1043,20 @@ export function AdmissionPage() {
                 <button
                   type="button"
                   onClick={goNext}
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                  disabled={
+                    currentStep === 1 &&
+                    (isLoadingPrograms ||
+                      isProgramsError)
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
-
                   <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  disabled={
-                    isSubmitting
-                  }
+                  disabled={isSubmitting}
                   className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? (
@@ -1176,10 +1080,6 @@ export function AdmissionPage() {
   );
 }
 
-/* =========================================================
-   STEP CONTAINER
-========================================================= */
-
 function StepContainer({
   title,
   description,
@@ -1196,7 +1096,7 @@ function StepContainer({
           {title}
         </h2>
 
-        <p className="mt-2 text-sm text-stone-500">
+        <p className="mt-2 text-sm text-stone-500 dark:text-stone-400">
           {description}
         </p>
       </div>
@@ -1205,10 +1105,6 @@ function StepContainer({
     </div>
   );
 }
-
-/* =========================================================
-   INPUT
-========================================================= */
 
 function InputField({
   label,
@@ -1242,20 +1138,14 @@ function InputField({
         value={value}
         required={required}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="h-11 w-full rounded-xl border border-stone-300 bg-white px-3.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-950"
+        className="h-11 w-full rounded-xl border border-stone-300 bg-white px-3.5 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-950"
       />
     </div>
   );
 }
-
-/* =========================================================
-   SELECT
-========================================================= */
 
 function SelectField({
   label,
@@ -1286,9 +1176,7 @@ function SelectField({
         value={value}
         required={required}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
         className="h-11 w-full rounded-xl border border-stone-300 bg-white px-3.5 text-sm text-stone-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-950"
       >
@@ -1297,10 +1185,6 @@ function SelectField({
     </div>
   );
 }
-
-/* =========================================================
-   TEXT AREA
-========================================================= */
 
 function TextAreaField({
   label,
@@ -1334,20 +1218,14 @@ function TextAreaField({
         required={required}
         rows={rows}
         onChange={(event) =>
-          onChange(
-            event.target.value
-          )
+          onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="w-full resize-none rounded-xl border border-stone-300 bg-white px-3.5 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-950"
+        className="w-full resize-none rounded-xl border border-stone-300 bg-white px-3.5 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100 dark:placeholder:text-stone-500 dark:focus:border-emerald-500 dark:focus:ring-emerald-950"
       />
     </div>
   );
 }
-
-/* =========================================================
-   FILE UPLOAD
-========================================================= */
 
 function FileUploadField({
   label,
@@ -1358,14 +1236,12 @@ function FileUploadField({
 }: {
   label: string;
   file: File | null;
-  onChange: (
-    file: File | null
-  ) => void;
+  onChange: (file: File | null) => void;
   accept?: string;
   required?: boolean;
 }) {
   function handleChange(
-    event: ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>,
   ) {
     const selectedFile =
       event.target.files?.[0] ?? null;
@@ -1397,7 +1273,7 @@ function FileUploadField({
                 {file.name}
               </p>
 
-              <p className="mt-1 text-xs text-emerald-600">
+              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                 File selected
               </p>
             </>
@@ -1407,7 +1283,7 @@ function FileUploadField({
                 Choose File
               </p>
 
-              <p className="mt-1 text-xs text-stone-400">
+              <p className="mt-1 text-xs text-stone-400 dark:text-stone-500">
                 PDF or image file
               </p>
             </>
@@ -1421,9 +1297,7 @@ function FileUploadField({
         <input
           type="file"
           accept={accept}
-          required={
-            required && !file
-          }
+          required={required && !file}
           onChange={handleChange}
           className="sr-only"
         />
@@ -1431,3 +1305,5 @@ function FileUploadField({
     </div>
   );
 }
+
+export default AdmissionPage;

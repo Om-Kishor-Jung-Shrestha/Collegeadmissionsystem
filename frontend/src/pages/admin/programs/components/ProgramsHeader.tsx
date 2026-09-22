@@ -1,13 +1,19 @@
 import { Plus } from "lucide-react";
 
+// interface ProgramsHeaderProps {
+//   totalPrograms: number;
+//   onAddProgram: () => void;
+// }
 interface ProgramsHeaderProps {
   totalPrograms: number;
   onAddProgram: () => void;
+  onAddCourse: () => void;
 }
 
 export function ProgramsHeader({
   totalPrograms,
   onAddProgram,
+  onAddCourse,
 }: ProgramsHeaderProps) {
   return (
     <section>
@@ -34,11 +40,7 @@ export function ProgramsHeader({
 
           <button
             type="button"
-            onClick={() =>
-              window.alert(
-                "Course management will be implemented later."
-              )
-            }
+            onClick={onAddCourse}
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-200"
           >
             <Plus className="h-4 w-4" />

@@ -120,18 +120,26 @@
 //   useDeleteProgramMutation,
 // } = programsApi;
 
+
+
 import { baseApi } from "@/services/base-api";
+
 import type {
-  ProgramResponseDto,
   CreateProgramDto,
-  UpdateProgramDto,
   ProgramIdParamDto,
+  ProgramListResponseDto,
+  ProgramResponseDto,
+  UpdateProgramDto,
 } from "../types/program.types";
+
 import type { ProgramQueryDto } from "../types/program-query.types";
 
 export const programsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPrograms: builder.query<ProgramResponseDto[], ProgramQueryDto | void>({
+    getPrograms: builder.query<
+      ProgramListResponseDto,
+      ProgramQueryDto | void
+    >({
       query: (params) => ({
         url: "/programs",
         method: "GET",
@@ -140,7 +148,10 @@ export const programsApi = baseApi.injectEndpoints({
       providesTags: ["Program"],
     }),
 
-    getProgram: builder.query<ProgramResponseDto, ProgramIdParamDto>({
+    getProgram: builder.query<
+      ProgramResponseDto,
+      ProgramIdParamDto
+    >({
       query: ({ id }) => ({
         url: `/programs/${id}`,
         method: "GET",
@@ -150,7 +161,10 @@ export const programsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    createProgram: builder.mutation<ProgramResponseDto, CreateProgramDto>({
+    createProgram: builder.mutation<
+      ProgramResponseDto,
+      CreateProgramDto
+    >({
       query: (body) => ({
         url: "/programs",
         method: "POST",
@@ -174,7 +188,10 @@ export const programsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteProgram: builder.mutation<null, ProgramIdParamDto>({
+    deleteProgram: builder.mutation<
+      null,
+      ProgramIdParamDto
+    >({
       query: ({ id }) => ({
         url: `/programs/${id}`,
         method: "DELETE",

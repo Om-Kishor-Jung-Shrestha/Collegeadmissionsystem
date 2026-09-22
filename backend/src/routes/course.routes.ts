@@ -20,6 +20,13 @@ import {
   UpdateCourseDto,
   CourseIdParamDto,
 } from "../dtos/course.dtos";
+import {
+  uploadCourseFeeStructure,
+} from "../controllers/course-upload.controller";
+
+import {
+  uploadCourseFeeStructure as uploadCourseFeeStructureMiddleware,
+} from "../middleware/course-upload.middleware";
 
 const router = Router();
 router.get(
@@ -27,7 +34,13 @@ router.get(
   validateQueryDto(CourseQueryDto),
   asyncHandler(getCourses)
 );
-
+router.post(
+  "/upload-fee-structure",
+  authenticate,
+  authorize("admin", "superadmin"),
+  uploadCourseFeeStructureMiddleware,
+  asyncHandler(uploadCourseFeeStructure)
+);
 router.get(
   "/:id",
   validateParamsDto(CourseIdParamDto),

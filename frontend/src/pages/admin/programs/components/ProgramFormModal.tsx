@@ -1,6 +1,6 @@
-import type {
-  FormEvent,
-} from "react";
+// import type {
+//   FormEvent,
+// } from "react";
 
 import { X } from "lucide-react";
 
@@ -9,6 +9,22 @@ import type {
   ProgramResponseDto,
 } from "@/features/programs/types/program.types";
 
+// interface ProgramFormModalProps {
+//   open: boolean;
+//   editingProgram: ProgramResponseDto | null;
+//   form: CreateProgramDto;
+//   isSaving: boolean;
+
+//   onChange: React.Dispatch<
+//     React.SetStateAction<CreateProgramDto>
+//   >;
+
+//   onSubmit: (
+//     event: React.FormEvent<HTMLFormElement>
+//   ) => void;
+
+//   onClose: () => void;
+// }
 interface ProgramFormModalProps {
   open: boolean;
   editingProgram: ProgramResponseDto | null;
@@ -19,9 +35,9 @@ interface ProgramFormModalProps {
     React.SetStateAction<CreateProgramDto>
   >;
 
-  onSubmit: (
-    event: React.FormEvent<HTMLFormElement>
-  ) => void;
+  onSubmit: NonNullable<
+    React.ComponentProps<"form">["onSubmit"]
+  >;
 
   onClose: () => void;
 }

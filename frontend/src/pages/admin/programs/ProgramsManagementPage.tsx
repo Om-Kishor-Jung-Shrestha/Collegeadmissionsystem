@@ -240,6 +240,7 @@ import { ProgramsTable } from "./components/ProgramsTable";
 import { ProgramsPagination } from "./components/ProgramsPagination";
 import { ProgramFormModal } from "./components/ProgramFormModal";
 import { ProgramViewModal } from "./components/ProgramViewModal";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 10;
 
@@ -248,10 +249,13 @@ const initialForm: CreateProgramDto = {
   name: "",
 };
 
+
+
 export function ProgramsManagementPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const navigate = useNavigate();
 
   const [editingProgram, setEditingProgram] =
     useState<ProgramResponseDto | null>(null);
@@ -284,10 +288,15 @@ export function ProgramsManagementPage() {
   const [deleteProgram, { isLoading: isDeleting }] =
     useDeleteProgramMutation();
 
-  const programs = data?.data ?? [];
+  // const programs = data?.data ?? [];
+  // const pagination = data?.pagination;
+
+  // const totalPrograms = pagination?.total ?? 0;
+  // const totalPages = pagination?.totalPages ?? 1;
+  const programs = data?.items ?? [];
   const pagination = data?.pagination;
 
-  const totalPrograms = pagination?.total ?? 0;
+  const totalPrograms = pagination?.totalItems ?? 0;
   const totalPages = pagination?.totalPages ?? 1;
 
   function handleSearchChange(value: string) {
@@ -351,34 +360,65 @@ export function ProgramsManagementPage() {
     }
   }
 
-  async function handleSubmit(event: SubmitEvent) {
-    event.preventDefault();
+  // async function handleSubmit(event: SubmitEvent) {
+  //   event.preventDefault();
 
-    const payload: CreateProgramDto = {
-      mnemonic: form.mnemonic.trim(),
-      name: form.name.trim(),
-    };
+  //   const payload: CreateProgramDto = {
+  //     mnemonic: form.mnemonic.trim(),
+  //     name: form.name.trim(),
+  //   };
 
-    if (!payload.mnemonic || !payload.name) {
-      return;
-    }
+  //   if (!payload.mnemonic || !payload.name) {
+  //     return;
+  //   }
 
-    try {
-      if (editingProgram) {
-        await updateProgram({
-          id: editingProgram.id,
-          ...payload,
-        }).unwrap();
-      } else {
-        await createProgram(payload).unwrap();
-        setCurrentPage(1);
-      }
+  //   try {
+  //     if (editingProgram) {
+  //       await updateProgram({
+  //         id: editingProgram.id,
+  //         ...payload,
+  //       }).unwrap();
+  //     } else {
+  //       await createProgram(payload).unwrap();
+  //       setCurrentPage(1);
+  //     }
 
-      handleCloseForm();
-    } catch {
-      // handled by mutation state
-    }
+  //     handleCloseForm();
+  //   } catch {
+  //     // handled by mutation state
+  //   }
+  // }
+
+  const handleSubmit: NonNullable<
+  React.ComponentProps<"form">["onSubmit"]
+> = async (event) => {
+  event.preventDefault();
+
+  const payload: CreateProgramDto = {
+    mnemonic: form.mnemonic.trim(),
+    name: form.name.trim(),
+  };
+
+  if (!payload.mnemonic || !payload.name) {
+    return;
   }
+
+  try {
+    if (editingProgram) {
+      await updateProgram({
+        id: editingProgram.id,
+        ...payload,
+      }).unwrap();
+    } else {
+      await createProgram(payload).unwrap();
+      setCurrentPage(1);
+    }
+
+    handleCloseForm();
+  } catch {
+    // handled by mutation state
+  }
+};
 
   return (
     <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-7">
@@ -386,6 +426,9 @@ export function ProgramsManagementPage() {
         <ProgramsHeader
           totalPrograms={totalPrograms}
           onAddProgram={handleAddProgram}
+          onAddCourse={() =>
+            navigate("/admin/courses/new")
+          }
         />
 
         <ProgramsSearch

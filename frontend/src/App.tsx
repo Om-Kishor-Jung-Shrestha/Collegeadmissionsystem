@@ -137,6 +137,7 @@
 
 // export default App;
 
+
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { PublicLayout } from "@/layouts/PublicLayout/PublicLayout";
@@ -146,19 +147,23 @@ import { HomePage } from "@/pages/public/HomePage";
 import { AboutPage } from "@/pages/public/AboutPage";
 import { ProgramsPage } from "@/pages/public/ProgramsPage";
 import { ContactPage } from "@/pages/public/ContactPage";
+import { AdmissionPage } from "@/pages/public/AdmissionPage";
 
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { VerifyOtpPage } from "@/pages/auth/VerifyOtpPage";
 
 import { DashboardPage } from "@/pages/admin/DashboardPage";
+import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
+
+import { CourseBuilderPage } from "@/pages/admin/courses/CourseBuilderPage";
+// import CourseManagementPage from "@/pages/admin/courses/course-management/CourseManagementPage";
+import { CourseDetailsPage } from "@/pages/admin/courses/CourseDetailsPage";
 
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { ProtectedAdminRoute } from "./routes/ProtectedAdminRoute";
 import { GuestRoute } from "./routes/GuestRoute";
-import { AdmissionPage } from "@/pages/public/AdmissionPage";
-// import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
-import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
+import CourseManagementPage from "./pages/admin/courses/ course-management/CourseManagementPage";
 
 function App() {
   return (
@@ -210,19 +215,33 @@ function App() {
 
           {/* Admin only */}
           <Route element={<ProtectedAdminRoute />}>
-            
             <Route
               path="/admin/programs"
               element={<ProgramsManagementPage />}
             />
 
+            {/* Course Management */}
             <Route
               path="/admin/courses"
-              element={
-                <div className="p-8">
-                  Courses
-                </div>
-              }
+              element={<CourseManagementPage />}
+            />
+
+            {/* Create Course */}
+            <Route
+              path="/admin/courses/new"
+              element={<CourseBuilderPage />}
+            />
+
+            {/* View Course */}
+            <Route
+              path="/admin/courses/:id"
+              element={<CourseDetailsPage />}
+            />
+
+            {/* Edit Course */}
+            <Route
+              path="/admin/courses/:id/edit"
+              element={<CourseBuilderPage />}
             />
 
             <Route
@@ -246,6 +265,7 @@ function App() {
         </Route>
       </Route>
 
+      {/* Fallback */}
       <Route
         path="*"
         element={<Navigate to="/" replace />}

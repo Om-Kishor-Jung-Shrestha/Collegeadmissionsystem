@@ -1,3 +1,5 @@
+
+
 import { Type } from "class-transformer";
 
 import {
@@ -8,13 +10,12 @@ import {
   IsMongoId,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
+  ArrayMaxSize,
   Max,
   MaxLength,
   Min,
-  MinLength,
   ValidateNested,
 } from "class-validator";
 
@@ -183,7 +184,7 @@ export class CreateCourseDto {
 
   @IsArray()
   @IsString({ each: true })
-  @Max(5, {
+  @ArrayMaxSize(5, {
     message: "A course can have a maximum of 5 highlights",
   })
   highlights!: string[];
