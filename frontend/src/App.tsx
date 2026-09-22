@@ -156,6 +156,9 @@ import { DashboardPage } from "@/pages/admin/DashboardPage";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { ProtectedAdminRoute } from "./routes/ProtectedAdminRoute";
 import { GuestRoute } from "./routes/GuestRoute";
+import { AdmissionPage } from "@/pages/public/AdmissionPage";
+// import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
+import { ProgramsManagementPage } from "@/pages/admin/programs/ProgramsManagementPage";
 
 function App() {
   return (
@@ -166,10 +169,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/programs" element={<ProgramsPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route
-          path="/admission"
-          element={<div>Admission Form</div>}
-        />
+        <Route path="/admission" element={<AdmissionPage />} />
       </Route>
 
       {/* Guest */}
@@ -210,13 +210,10 @@ function App() {
 
           {/* Admin only */}
           <Route element={<ProtectedAdminRoute />}>
+            
             <Route
               path="/admin/programs"
-              element={
-                <div className="p-8">
-                  Programs
-                </div>
-              }
+              element={<ProgramsManagementPage />}
             />
 
             <Route

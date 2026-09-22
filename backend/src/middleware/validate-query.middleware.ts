@@ -1,3 +1,67 @@
+// import { plainToInstance } from "class-transformer";
+// import {
+//   validate,
+//   type ValidatorOptions,
+// } from "class-validator";
+// import {
+//   Request,
+//   Response,
+//   NextFunction,
+// } from "express";
+// import { AppError } from "../errors/app.error";
+
+// export const validateQueryDto = (
+//   dtoClass: new () => object,
+//   options?: ValidatorOptions
+// ) => {
+//   return async (
+//     req: Request,
+//     _res: Response,
+//     next: NextFunction
+//   ): Promise<void> => {
+//     const dto = plainToInstance(
+//       dtoClass,
+//       req.query,
+//       {
+//         enableImplicitConversion: true,
+//       }
+//     );
+
+//     const errors = await validate(dto, {
+//       whitelist: true,
+//       forbidNonWhitelisted: true,
+//       ...options,
+//     });
+
+//     if (errors.length > 0) {
+//       const details = errors.map((error) => ({
+//         field: error.property,
+//         messages: Object.values(
+//           error.constraints ?? {}
+//         ),
+//         children: error.children?.length
+//           ? error.children
+//           : undefined,
+//       }));
+
+//       next(
+//         new AppError(
+//           "Validation failed",
+//           400,
+//           "VALIDATION_ERROR",
+//           details
+//         )
+//       );
+
+//       return;
+//     }
+
+//     req.query = dto as Request["query"];
+
+//     next();
+//   };
+// };
+
 import { plainToInstance } from "class-transformer";
 import {
   validate,
@@ -19,13 +83,9 @@ export const validateQueryDto = (
     _res: Response,
     next: NextFunction
   ): Promise<void> => {
-    const dto = plainToInstance(
-      dtoClass,
-      req.query,
-      {
-        enableImplicitConversion: true,
-      }
-    );
+    const dto = plainToInstance(dtoClass, req.query, {
+      enableImplicitConversion: true,
+    });
 
     const errors = await validate(dto, {
       whitelist: true,
@@ -36,9 +96,7 @@ export const validateQueryDto = (
     if (errors.length > 0) {
       const details = errors.map((error) => ({
         field: error.property,
-        messages: Object.values(
-          error.constraints ?? {}
-        ),
+        messages: Object.values(error.constraints ?? {}),
         children: error.children?.length
           ? error.children
           : undefined,
@@ -52,11 +110,8 @@ export const validateQueryDto = (
           details
         )
       );
-
       return;
     }
-
-    req.query = dto as Request["query"];
 
     next();
   };
