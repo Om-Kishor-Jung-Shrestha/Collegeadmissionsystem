@@ -8,9 +8,7 @@ import type {
 
 import type {
   ICourse,
-  ICourseSemester,
-  ICourseSemesterFee,
-  ICourseSubject,
+  
 } from "../models/course.model";
 
 // ---------- Entity -> Response DTO ----------

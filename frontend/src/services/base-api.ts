@@ -327,14 +327,14 @@ import {
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 
-declare global {
-  interface ImportMeta {
-    readonly env: {
-      readonly VITE_API_BASE_URL?: string;
-      readonly [key: string]: string | undefined;
-    };
-  }
-}
+// declare global {
+//   interface ImportMeta {
+//     readonly env: {
+//       readonly VITE_API_BASE_URL?: string;
+//       readonly [key: string]: string | undefined;
+//     };
+//   }
+// }
 
 interface ApiSuccessResponse<T> {
   success: true;

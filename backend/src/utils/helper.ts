@@ -65,7 +65,11 @@ export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(date));
 }
 
+// export function generateSecureToken(bytes = 32): string {
+//   const crypto = require('node:crypto');
+//   return crypto.randomBytes(bytes).toString('hex');
+// }
+
 export function generateSecureToken(bytes = 32): string {
-  const crypto = require('node:crypto');
-  return crypto.randomBytes(bytes).toString('hex');
+  return crypto.randomBytes(bytes).toString("hex");
 }

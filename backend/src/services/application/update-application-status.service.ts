@@ -69,9 +69,25 @@ export async function updateApplicationStatusService(
   application.status =
     dto.status;
 
-  await application.save();
+//   await application.save();
 
-  return toApplicationResponseDto(
-    application
-  );
+//   return toApplicationResponseDto(
+//     application
+//   );
+// }
+
+await application.save();
+
+const populatedApplication =
+  await application.populate<{
+    program: {
+      _id: typeof application.program;
+      mnemonic: string;
+      name: string;
+    };
+  }>("program");
+
+return toApplicationResponseDto(
+  populatedApplication
+);
 }

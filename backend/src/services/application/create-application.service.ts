@@ -316,10 +316,21 @@ export async function createApplicationService(
      * 11. Return response DTO
      * ----------------------------------------------------
      */
+const populatedApplication =
+  await application.populate<{
+    program: {
+      _id: typeof application.program;
+      mnemonic: string;
+      name: string;
+    };
+  }>("program");
 
-    return toApplicationResponseDto(
-      application
-    );
+return toApplicationResponseDto(
+  populatedApplication
+);
+    // return toApplicationResponseDto(
+    //   application
+    // );
   } catch (error) {
     /*
      * ----------------------------------------------------

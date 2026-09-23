@@ -11,8 +11,17 @@ export async function redisSet(key: string, value: unknown, exSeconds?: number):
     else await redis.set(key, v);
   } catch(e) { console.error('[Redis] SET error:', e); }
 }
+
+  
+// export async function redisDel(key: string): Promise<void> {
+//   try { await getRedisClient().del(key); } catch {}
+// }
 export async function redisDel(key: string): Promise<void> {
-  try { await getRedisClient().del(key); } catch {}
+  try {
+    await getRedisClient().del(key);
+  } catch (error) {
+    console.error("[Redis] DEL error:", error);
+  }
 }
 export async function redisDelPattern(pattern: string): Promise<void> {
   try {

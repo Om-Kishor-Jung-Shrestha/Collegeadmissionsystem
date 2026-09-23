@@ -17,6 +17,18 @@ import {
 import { toPublicCourseDetailsDto, toPublicProgramCatalogItemDto } from "../mapper/public-program-catalog.mapper";
 import { AppError } from "../errors/app.error";
 
+type PublicProgramCatalogAggregateItem = {
+  _id: mongoose.Types.ObjectId;
+  duration: string;
+  totalSemesters: number;
+  totalFee: number;
+  program: {
+    _id: mongoose.Types.ObjectId;
+    mnemonic: string;
+    name: string;
+  };
+};
+
 export const getPublicProgramCatalog = async (
   query: PublicProgramCatalogQueryDto,
 ): Promise<PublicProgramCatalogResponseDto> => {
@@ -241,7 +253,8 @@ export const getPublicProgramCatalog = async (
     result?.count?.[0]?.total ?? 0;
 
   const items = (result?.items ?? []).map(
-    (course: any) =>
+    // (course: any) =>
+     (course: PublicProgramCatalogAggregateItem) =>
       toPublicProgramCatalogItemDto({
         ...course,
         program: course.program,

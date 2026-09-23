@@ -126,9 +126,26 @@ export function isSuperAdmin(
 export const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  // fileFilter: (_req, file, cb) => {
+  //   const allowed = ['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/quicktime','video/x-msvideo','application/pdf'];
+  //   allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error(`File type ${file.mimetype} not allowed`));
   fileFilter: (_req, file, cb) => {
-    const allowed = ['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/quicktime','video/x-msvideo','application/pdf'];
-    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error(`File type ${file.mimetype} not allowed`));
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+      "video/mp4",
+      "video/quicktime",
+      "video/x-msvideo",
+      "application/pdf",
+    ];
+
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`File type ${file.mimetype} not allowed`));
+    }
   },
 });
 
@@ -147,9 +164,23 @@ const localVideoStorage = multer.diskStorage({
 export const localVideoUpload = multer({
   storage: localVideoStorage,
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB local video cap to keep uploads safe and manageable
+  // fileFilter: (_req, file, cb) => {
+  //   const allowed = ['video/mp4','video/quicktime','video/x-msvideo','video/webm','video/mpeg'];
+  //   allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only video files allowed'));
   fileFilter: (_req, file, cb) => {
-    const allowed = ['video/mp4','video/quicktime','video/x-msvideo','video/webm','video/mpeg'];
-    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only video files allowed'));
+    const allowed = [
+      "video/mp4",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/webm",
+      "video/mpeg",
+    ];
+
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only video files allowed"));
+    }
   },
 });
 

@@ -438,9 +438,22 @@ export async function updateApplicationService(
       }
     }
 
-    return toApplicationResponseDto(
-      application
-    );
+    // return toApplicationResponseDto(
+    //   application
+    // );
+
+    const populatedApplication =
+  await application.populate<{
+    program: {
+      _id: typeof application.program;
+      mnemonic: string;
+      name: string;
+    };
+  }>("program");
+
+return toApplicationResponseDto(
+  populatedApplication
+);
   } catch (error) {
     /*
      * ----------------------------------------------------
