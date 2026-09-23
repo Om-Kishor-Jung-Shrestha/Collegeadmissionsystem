@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+
 import {
   ChevronDown,
   ChevronLeft,
@@ -6,155 +7,88 @@ import {
   Search,
   SlidersHorizontal,
 } from "lucide-react";
+
 import { Link } from "react-router-dom";
 
-interface ProgramCard {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  fee: number;
-  level: "Bachelor" | "Master";
-}
+import { useGetPublicProgramCatalogQuery } from "@/features/programs/api/public-program-catalog.api";
 
-const programs: ProgramCard[] = [
-  {
-    id: "1",
-    name: "BSc CSIT",
-    description:
-      "A computer science and information technology program focused on software, systems, and practical computing.",
-    duration: "4 Years",
-    fee: 450000,
-    level: "Bachelor",
-  },
-  {
-    id: "2",
-    name: "BBA",
-    description:
-      "A business administration program covering management, finance, marketing, entrepreneurship, and leadership.",
-    duration: "4 Years",
-    fee: 400000,
-    level: "Bachelor",
-  },
-  {
-    id: "3",
-    name: "BCA",
-    description:
-      "An application-oriented computing program focused on software development and computer applications.",
-    duration: "4 Years",
-    fee: 380000,
-    level: "Bachelor",
-  },
-  {
-    id: "4",
-    name: "BIT",
-    description:
-      "An information technology program covering programming, databases, networking, and modern IT systems.",
-    duration: "4 Years",
-    fee: 420000,
-    level: "Bachelor",
-  },
-  {
-    id: "5",
-    name: "BBM",
-    description:
-      "A management-focused undergraduate program designed around business and organizational skills.",
-    duration: "4 Years",
-    fee: 390000,
-    level: "Bachelor",
-  },
-  {
-    id: "6",
-    name: "MBA",
-    description:
-      "An advanced management program focused on strategic thinking, leadership, and business decision-making.",
-    duration: "2 Years",
-    fee: 500000,
-    level: "Master",
-  },
-];
+import type {
+  PublicProgramCatalogSort,
+} from "@/features/programs/types/public-program-catalog.types";
 
 const durationOptions = ["2 Years", "3 Years", "4 Years"];
 
 const ITEMS_PER_PAGE = 6;
 
+const sortOptions: Array<{
+  label: string;
+  value: PublicProgramCatalogSort;
+}> = [
+  {
+    label: "Latest",
+    value: "latest",
+  },
+  {
+    label: "Fee: Low to High",
+    value: "fee_asc",
+  },
+  {
+    label: "Fee: High to Low",
+    value: "fee_desc",
+  },
+  {
+    label: "Name: A to Z",
+    value: "name_asc",
+  },
+  {
+    label: "Name: Z to A",
+    value: "name_desc",
+  },
+];
+
 export function ProgramsContent() {
   const [search, setSearch] = useState("");
   const [sidebarSearch, setSidebarSearch] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState("All Programs");
-  const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
+
+  const [selectedDurations, setSelectedDurations] = useState<string[]>(
+    [],
+  );
+
   const [minFee, setMinFee] = useState("");
   const [maxFee, setMaxFee] = useState("");
-  const [sortBy, setSortBy] = useState("Latest");
+
+  const [sortBy, setSortBy] =
+    useState<PublicProgramCatalogSort>("latest");
+
   const [page, setPage] = useState(1);
 
-  const filteredPrograms = useMemo(() => {
-    let result = [...programs];
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetPublicProgramCatalogQuery({
+    search: search.trim() || undefined,
 
-    const combinedSearch = search || sidebarSearch;
+    duration:
+      selectedDurations.length > 0
+        ? selectedDurations.join(",")
+        : undefined,
 
-    if (combinedSearch.trim()) {
-      const value = combinedSearch.toLowerCase().trim();
+    minFee: minFee ? Number(minFee) : undefined,
 
-      result = result.filter(
-        (program) =>
-          program.name.toLowerCase().includes(value) ||
-          program.description.toLowerCase().includes(value),
-      );
-    }
+    maxFee: maxFee ? Number(maxFee) : undefined,
 
-    if (selectedLevel !== "All Programs") {
-      result = result.filter(
-        (program) => program.level === selectedLevel,
-      );
-    }
+    sort: sortBy,
 
-    if (selectedDurations.length > 0) {
-      result = result.filter((program) =>
-        selectedDurations.includes(program.duration),
-      );
-    }
+    page,
 
-    if (minFee) {
-      result = result.filter(
-        (program) => program.fee >= Number(minFee),
-      );
-    }
+    limit: ITEMS_PER_PAGE,
+  });
 
-    if (maxFee) {
-      result = result.filter(
-        (program) => program.fee <= Number(maxFee),
-      );
-    }
-
-    if (sortBy === "Fee: Low to High") {
-      result.sort((a, b) => a.fee - b.fee);
-    }
-
-    if (sortBy === "Fee: High to Low") {
-      result.sort((a, b) => b.fee - a.fee);
-    }
-
-    return result;
-  }, [
-    search,
-    sidebarSearch,
-    selectedLevel,
-    selectedDurations,
-    minFee,
-    maxFee,
-    sortBy,
-  ]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredPrograms.length / ITEMS_PER_PAGE),
-  );
-
-  const visiblePrograms = filteredPrograms.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
+  const programs = data?.items ?? [];
+  const pagination = data?.pagination;
 
   const toggleDuration = (duration: string) => {
     setSelectedDurations((current) =>
@@ -174,13 +108,24 @@ export function ProgramsContent() {
   const resetFilters = () => {
     setSearch("");
     setSidebarSearch("");
-    setSelectedLevel("All Programs");
     setSelectedDurations([]);
     setMinFee("");
     setMaxFee("");
-    setSortBy("Latest");
+    setSortBy("latest");
     setPage(1);
   };
+
+  const formatFee = (amount: number) => {
+    return new Intl.NumberFormat("en-US").format(amount);
+  };
+
+  const hasFilters =
+    Boolean(search) ||
+    Boolean(sidebarSearch) ||
+    selectedDurations.length > 0 ||
+    Boolean(minFee) ||
+    Boolean(maxFee) ||
+    sortBy !== "latest";
 
   return (
     <section className="bg-[#faf9f6] dark:bg-stone-950">
@@ -216,41 +161,14 @@ export function ProgramsContent() {
                   value={sidebarSearch}
                   onChange={(event) => {
                     setSidebarSearch(event.target.value);
-                    setPage(1);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      applyFilters();
+                    }
                   }}
                   placeholder="Search..."
                   className="h-11 w-full rounded-lg border border-stone-300 bg-white pl-10 pr-3 text-sm outline-none focus:border-[#173f35] dark:border-stone-700 dark:bg-stone-950 dark:focus:border-[#d6b56a]"
-                />
-              </div>
-            </div>
-
-            {/* Program */}
-            <div className="mt-7">
-              <label
-                htmlFor="program-level"
-                className="mb-2 block text-sm font-medium"
-              >
-                Program
-              </label>
-
-              <div className="relative">
-                <select
-                  id="program-level"
-                  value={selectedLevel}
-                  onChange={(event) => {
-                    setSelectedLevel(event.target.value);
-                    setPage(1);
-                  }}
-                  className="h-11 w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 pr-9 text-sm outline-none dark:border-stone-700 dark:bg-stone-950"
-                >
-                  <option>All Programs</option>
-                  <option>Bachelor</option>
-                  <option>Master</option>
-                </select>
-
-                <ChevronDown
-                  size={17}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
                 />
               </div>
             </div>
@@ -329,7 +247,7 @@ export function ProgramsContent() {
             </div>
           </aside>
 
-          {/* Programs Area */}
+          {/* Programs */}
           <div>
             {/* Toolbar */}
             <div className="mb-6 flex flex-col gap-4">
@@ -340,14 +258,15 @@ export function ProgramsContent() {
                   </h2>
 
                   <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                    {filteredPrograms.length}{" "}
-                    {filteredPrograms.length === 1
+                    {pagination?.total ?? 0}{" "}
+                    {pagination?.total === 1
                       ? "Program"
                       : "Programs"}
                   </p>
                 </div>
 
                 <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                  {/* Search */}
                   <div className="relative sm:w-56">
                     <Search
                       size={17}
@@ -365,18 +284,27 @@ export function ProgramsContent() {
                     />
                   </div>
 
-                  <div className="relative sm:w-40">
+                  {/* Sort */}
+                  <div className="relative sm:w-48">
                     <select
                       value={sortBy}
                       onChange={(event) => {
-                        setSortBy(event.target.value);
+                        setSortBy(
+                          event.target
+                            .value as PublicProgramCatalogSort,
+                        );
                         setPage(1);
                       }}
                       className="h-11 w-full appearance-none rounded-lg border border-stone-300 bg-white px-3 pr-8 text-sm outline-none dark:border-stone-700 dark:bg-stone-900"
                     >
-                      <option>Latest</option>
-                      <option>Fee: Low to High</option>
-                      <option>Fee: High to Low</option>
+                      {sortOptions.map((option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
 
                     <ChevronDown
@@ -388,62 +316,114 @@ export function ProgramsContent() {
               </div>
             </div>
 
-            {/* Cards */}
-            {visiblePrograms.length > 0 ? (
+            {/* Loading */}
+            {isLoading ? (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {visiblePrograms.map((program) => (
-                  <article
-                    key={program.id}
-                    className="group flex flex-col rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md dark:border-stone-800 dark:bg-stone-900"
+                {Array.from({
+                  length: ITEMS_PER_PAGE,
+                }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-[330px] animate-pulse rounded-2xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#f1eadb] text-2xl dark:bg-stone-800">
-                      🎓
+                    <div className="h-14 w-14 rounded-xl bg-stone-200 dark:bg-stone-800" />
+
+                    <div className="mt-5 h-3 w-20 rounded bg-stone-200 dark:bg-stone-800" />
+
+                    <div className="mt-3 h-6 w-3/4 rounded bg-stone-200 dark:bg-stone-800" />
+
+                    <div className="mt-8 grid grid-cols-2 gap-4">
+                      <div className="h-10 rounded bg-stone-200 dark:bg-stone-800" />
+
+                      <div className="h-10 rounded bg-stone-200 dark:bg-stone-800" />
                     </div>
 
-                    <div className="mt-5 flex-1">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-[#8d6b2f] dark:text-[#d6b56a]">
-                        {program.level}
-                      </span>
-
-                      <h3 className="mt-2 text-xl font-bold text-[#173f35] dark:text-stone-100">
-                        {program.name}
-                      </h3>
-
-                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                        {program.description}
-                      </p>
-
-                      <div className="mt-5 flex items-center justify-between border-t border-stone-200 pt-4 text-sm dark:border-stone-800">
-                        <div>
-                          <p className="text-xs text-stone-500">
-                            Duration
-                          </p>
-
-                          <p className="mt-1 font-semibold">
-                            {program.duration}
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-xs text-stone-500">
-                            Fee
-                          </p>
-
-                          <p className="mt-1 font-semibold">
-                            Rs. {program.fee.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <Link
-                      to={`/programs/${program.id}`}
-                      className="mt-6 block rounded-lg border border-[#173f35] px-4 py-2.5 text-center text-sm font-semibold text-[#173f35] transition hover:bg-[#173f35] hover:text-white dark:border-[#d6b56a] dark:text-[#d6b56a] dark:hover:bg-[#d6b56a] dark:hover:text-stone-950"
-                    >
-                      View Details
-                    </Link>
-                  </article>
+                    <div className="mt-8 h-12 rounded bg-stone-200 dark:bg-stone-800" />
+                  </div>
                 ))}
+              </div>
+            ) : isError ? (
+              <div className="rounded-2xl border border-red-200 bg-white px-6 py-16 text-center dark:border-red-900/50 dark:bg-stone-900">
+                <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">
+                  Unable to load programs
+                </h3>
+
+                <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+                  We couldn't retrieve the public program catalog.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => refetch()}
+                  className="mt-5 rounded-lg bg-[#173f35] px-5 py-2.5 text-sm font-semibold text-white dark:bg-[#d6b56a] dark:text-stone-950"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : programs.length > 0 ? (
+              <div className="relative">
+                {isFetching && (
+                  <div className="absolute inset-0 z-10 rounded-2xl bg-white/50 backdrop-blur-[1px] dark:bg-stone-950/50" />
+                )}
+
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {programs.map((program) => (
+                    <article
+                      key={program.id}
+                      className="group flex flex-col rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md dark:border-stone-800 dark:bg-stone-900"
+                    >
+                      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#f1eadb] text-2xl dark:bg-stone-800">
+                        🎓
+                      </div>
+
+                      <div className="mt-5 flex-1">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-[#8d6b2f] dark:text-[#d6b56a]">
+                          {program.mnemonic}
+                        </span>
+
+                        <h3 className="mt-2 text-xl font-bold text-[#173f35] dark:text-stone-100">
+                          {program.name}
+                        </h3>
+
+                        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-stone-200 pt-4 dark:border-stone-800">
+                          <div>
+                            <p className="text-xs text-stone-500 dark:text-stone-400">
+                              Duration
+                            </p>
+
+                            <p className="mt-1 font-semibold text-stone-800 dark:text-stone-200">
+                              {program.duration}
+                            </p>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-xs text-stone-500 dark:text-stone-400">
+                              Total Fee
+                            </p>
+
+                            <p className="mt-1 font-semibold text-stone-800 dark:text-stone-200">
+                              Rs. {formatFee(program.totalFee)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="mt-4 text-xs text-stone-500 dark:text-stone-400">
+                          {program.totalSemesters}{" "}
+                          {program.totalSemesters === 1
+                            ? "Semester"
+                            : "Semesters"}
+                        </p>
+                      </div>
+
+                      <Link
+                        to={`/programs/${program.id}`}
+                        className="mt-6 block rounded-lg border border-[#173f35] px-4 py-2.5 text-center text-sm font-semibold text-[#173f35] transition hover:bg-[#173f35] hover:text-white dark:border-[#d6b56a] dark:text-[#d6b56a] dark:hover:bg-[#d6b56a] dark:hover:text-stone-950"
+                      >
+                        View Details
+                      </Link>
+                    </article>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center dark:border-stone-700 dark:bg-stone-900">
@@ -460,24 +440,28 @@ export function ProgramsContent() {
                   Try changing your search or filter criteria.
                 </p>
 
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="mt-5 rounded-lg bg-[#173f35] px-5 py-2.5 text-sm font-semibold text-white"
-                >
-                  Reset Filters
-                </button>
+                {hasFilters && (
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="mt-5 rounded-lg bg-[#173f35] px-5 py-2.5 text-sm font-semibold text-white dark:bg-[#d6b56a] dark:text-stone-950"
+                  >
+                    Reset Filters
+                  </button>
+                )}
               </div>
             )}
 
             {/* Pagination */}
-            {filteredPrograms.length > 0 && (
+            {pagination && pagination.total > 0 && (
               <div className="mt-10 flex items-center justify-center gap-2">
                 <button
                   type="button"
-                  disabled={page === 1}
+                  disabled={!pagination.hasPrevious}
                   onClick={() =>
-                    setPage((current) => Math.max(1, current - 1))
+                    setPage((current) =>
+                      Math.max(1, current - 1),
+                    )
                   }
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-stone-300 text-stone-600 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
                 >
@@ -485,7 +469,9 @@ export function ProgramsContent() {
                 </button>
 
                 {Array.from(
-                  { length: totalPages },
+                  {
+                    length: pagination.totalPages,
+                  },
                   (_, index) => index + 1,
                 ).map((pageNumber) => (
                   <button
@@ -504,10 +490,13 @@ export function ProgramsContent() {
 
                 <button
                   type="button"
-                  disabled={page === totalPages}
+                  disabled={!pagination.hasNext}
                   onClick={() =>
                     setPage((current) =>
-                      Math.min(totalPages, current + 1),
+                      Math.min(
+                        pagination.totalPages,
+                        current + 1,
+                      ),
                     )
                   }
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-stone-300 text-stone-600 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"

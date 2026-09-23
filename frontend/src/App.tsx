@@ -418,6 +418,8 @@ import { CourseBuilderPage } from "@/pages/admin/courses/CourseBuilderPage";
 import { CourseDetailsPage } from "@/pages/admin/courses/CourseDetailsPage";
 
 import CourseManagementPage from "./pages/admin/courses/ course-management/CourseManagementPage";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 
 // import { ApplicationManagementProgram } from "@/pages/admin/application-management/application-management-program";
 
@@ -434,9 +436,14 @@ import ApplicationManagementProgram from "./pages/admin/application-management/a
 import ApplicationDetailsPage from "./pages/admin/application-management/ application-details-page";
 
 import UserManagementPage from "./pages/admin/user-management/user-management.page";
+// import { CourseDetailsPage } from "@/pages/public/CourseDetailsPage";
+import { CourseDetailsPage as PublicCourseDetailsPage } from "@/pages/public/CourseDetailsPage";
+import { AuthInitializer } from "@/app/providers/auth-initializer";
+
 
 function App() {
   return (
+    <AuthInitializer>
     <Routes>
       {/* =====================================================
           PUBLIC
@@ -448,6 +455,10 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
 
         <Route path="/programs" element={<ProgramsPage />} />
+         <Route
+    path="/programs/:id"
+    element={<PublicCourseDetailsPage />}
+  />
 
         <Route path="/contact" element={<ContactPage />} />
 
@@ -462,6 +473,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/signup" element={<SignupPage />} />
+         <Route
+    path="/forgot-password"
+    element={<ForgotPasswordPage />}
+  />
+  <Route
+    path="/reset-password"
+    element={<ResetPasswordPage />}
+  />
 
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
       </Route>
@@ -582,6 +601,7 @@ function App() {
         element={<Navigate to="/" replace />}
       />
     </Routes>
+    </AuthInitializer>
   );
 }
 

@@ -24,6 +24,7 @@ import applicationRoutes from "./routes/application.route";
 import dashboardRoutes from "./routes/dashboard.routes";
 import { configureCloudinary } from "./config/cloudinary";
 // import { configureCloudinary } from "./configservices/cloudinary.config";
+import publicProgramCatalogRoutes from "./routes/public-program-catalog.route";
 
 import userProfileRoute from "./routes/user-profile.route";
 
@@ -94,6 +95,11 @@ app.get("/", (_req, res) => {
   );
 });
 app.use(requestLoggerMiddleware);
+
+app.use(
+  "/api/v1/public/catalog",
+  publicProgramCatalogRoutes,
+);
 // ---------- Routes ----------
 
 // app.use(
